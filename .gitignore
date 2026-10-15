@@ -1,0 +1,85 @@
+# AI & Workspace Assistants / Local Rules
+.agent/
+.agents/
+.gemini/
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+.cursorrules
+.cursor/
+.copilot/
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+!*.env.example
+
+# Credentials & Signing keys
+key.properties
+**/android/key.properties
+*.keystore
+*.jks
+
+# Android local configurations & builds
+local.properties
+**/android/local.properties
+.gradle/
+**/android/.gradle/
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Miscellaneous & OS
+*.class
+*.log
+*.pyc
+*.swp
+*.tmp
+*.bak
+*.hprof
+*.crash
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Flutter / Dart / Pub
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Local databases (SQLite / Drift)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
