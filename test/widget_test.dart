@@ -1,30 +1,31 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:ferrodoc_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets(
+    'P02 Inicio arranca en estado inicial 0 y vacío según especificación',
+    (WidgetTester tester) async {
+      // Renderizamos la aplicación con su ProviderScope
+      await tester.pumpWidget(const ProviderScope(child: FerrodocApp()));
+      await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // 1. Verificación de identidad del negocio y terminal
+      expect(find.text('Hola, Ferretería AYM'), findsOneWidget);
+      expect(find.text('TERMINAL PRINCIPAL'), findsOneWidget);
+      expect(find.text('Local activo'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      // 2. Verificación de regla anti-hardcoding: arranca en S/ 0.00 y textos oficiales
+      expect(find.text('S/ 0.00'), findsOneWidget);
+      expect(
+        find.text('Aún no hay ventas hoy. Toca Nueva venta para empezar'),
+        findsOneWidget,
+      );
+      expect(find.text('Aún no tienes documentos'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+      // 3. Verificación de accesos rápidos
+      expect(find.text('Nueva venta'), findsOneWidget);
+      expect(find.text('Escanear doc'), findsOneWidget);
+    },
+  );
 }
