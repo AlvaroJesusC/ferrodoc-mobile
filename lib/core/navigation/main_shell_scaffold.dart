@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
+import 'package:ferrodoc_app/features/documentos/presentation/lista_documentos_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/nueva_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
@@ -35,12 +36,7 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
 
     final tabs = [
       InicioScreen(onNavigateToTab: _onTabSelected),
-      const _FeatureTabPlaceholder(
-        codigo: 'P04',
-        titulo: 'Documentos',
-        descripcion: 'Lista, filtros y escáner de comprobantes.',
-        icono: Icons.description_outlined,
-      ),
+      const ListaDocumentosScreen(),
       const NuevaVentaScreen(),
       const CatalogoScreen(),
       const _FeatureTabPlaceholder(

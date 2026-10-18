@@ -7,6 +7,7 @@ import 'package:ferrodoc_app/features/inicio/presentation/widgets/quick_actions_
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/terminal_header_card.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ultimos_documentos_section.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ventas_resumen_card.dart';
+import 'package:ferrodoc_app/features/documentos/presentation/escaner_documentos_screen.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 
 /// Pantalla principal P02 — Inicio de ferrodoc_app.
@@ -105,9 +106,10 @@ class InicioScreen extends ConsumerWidget {
                     );
                   }
                 },
-                onEscanearDoc: () => _showNotice(
-                  context,
-                  'Navegando a P05 — Escáner de documentos',
+                onEscanearDoc: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EscanerDocumentosScreen(),
+                  ),
                 ),
               ),
 
@@ -123,9 +125,10 @@ class InicioScreen extends ConsumerWidget {
                     _showNotice(context, 'Cambiando a P04 — Documentos');
                   }
                 },
-                onEscanear: () => _showNotice(
-                  context,
-                  'Navegando a P05 — Escáner de documentos',
+                onEscanear: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const EscanerDocumentosScreen(),
+                  ),
                 ),
                 onDocumentoTap: (doc) => _showNotice(
                   context,
