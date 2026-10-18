@@ -79,20 +79,32 @@ class InicioScreen extends ConsumerWidget {
                 resumen: state.resumenVentas,
                 onVerReporte: () =>
                     _showNotice(context, 'Navegando a P18 — Reporte de ventas'),
-                onNuevaVenta: () => _showNotice(
-                  context,
-                  'Navegando a P11 — Nueva venta (carrito)',
-                ),
+                onNuevaVenta: () {
+                  if (onNavigateToTab != null) {
+                    onNavigateToTab!(2);
+                  } else {
+                    _showNotice(
+                      context,
+                      'Navegando a P11 — Nueva venta (carrito)',
+                    );
+                  }
+                },
               ),
 
               SizedBox(height: shapes.spaceLarge),
 
               // Accesos rápidos de mostrador
               QuickActionsRow(
-                onNuevaVenta: () => _showNotice(
-                  context,
-                  'Navegando a P11 — Nueva venta (carrito)',
-                ),
+                onNuevaVenta: () {
+                  if (onNavigateToTab != null) {
+                    onNavigateToTab!(2);
+                  } else {
+                    _showNotice(
+                      context,
+                      'Navegando a P11 — Nueva venta (carrito)',
+                    );
+                  }
+                },
                 onEscanearDoc: () => _showNotice(
                   context,
                   'Navegando a P05 — Escáner de documentos',

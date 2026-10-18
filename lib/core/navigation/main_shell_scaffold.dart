@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
+import 'package:ferrodoc_app/features/ventas/presentation/nueva_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
@@ -40,12 +41,7 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
         descripcion: 'Lista, filtros y escáner de comprobantes.',
         icono: Icons.description_outlined,
       ),
-      const _FeatureTabPlaceholder(
-        codigo: 'P11 / P14',
-        titulo: 'Ventas',
-        descripcion: 'Nueva venta (carrito) e historial de ventas.',
-        icono: Icons.point_of_sale_outlined,
-      ),
+      const NuevaVentaScreen(),
       const CatalogoScreen(),
       const _FeatureTabPlaceholder(
         codigo: 'P03',
