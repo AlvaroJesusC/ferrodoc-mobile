@@ -4,6 +4,7 @@ import 'package:ferrodoc_app/features/catalogo/data/repositories/producto_reposi
 import 'package:ferrodoc_app/features/catalogo/domain/models/producto.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/cobro_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/controllers/carrito_controller.dart';
+import 'package:ferrodoc_app/features/ventas/presentation/historial_ventas_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/widgets/carrito_bottom_bar.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/widgets/carrito_detalle_sheet.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/widgets/producto_grid_card.dart';
@@ -172,6 +173,18 @@ class _NuevaVentaScreenState extends ConsumerState<NuevaVentaScreen> {
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: 'Historial de ventas',
+              color: colors.onSurface,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const HistorialVentasScreen(),
+                  ),
+                );
+              },
+            ),
             if (carrito.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.delete_sweep_outlined),

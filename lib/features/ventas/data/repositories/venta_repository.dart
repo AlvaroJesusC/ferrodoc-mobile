@@ -21,6 +21,9 @@ abstract interface class VentaRepository {
   /// Anula una venta registrada con motivo obligatorio.
   Future<void> anularVenta(String id, String motivo);
 
+  /// Marca la venta como compartida al emitirse el comprobante.
+  Future<void> marcarCompartido(String id);
+
   /// Limpia todas las ventas (para pruebas).
   Future<void> clearAll();
 }
@@ -87,6 +90,16 @@ class LocalVentaRepository implements VentaRepository {
         anulada: true,
         motivoAnulacion: () => motivo.trim(),
       );
+      _store[id] = updated;
+      _emit();
+    }
+  }
+
+  @override
+  Future<void> marcarCompartido(String id) async {
+    final venta = _store[id];
+    if (venta != null && !venta.compartido) {
+      final updated = venta.copyWith(compartido: true);
       _store[id] = updated;
       _emit();
     }

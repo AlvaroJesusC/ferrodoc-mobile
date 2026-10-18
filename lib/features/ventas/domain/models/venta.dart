@@ -22,6 +22,7 @@ class Venta {
     required this.creadoEn,
     this.anulada = false,
     this.motivoAnulacion,
+    this.compartido = false,
   });
 
   final String id;
@@ -38,6 +39,7 @@ class Venta {
   final DateTime creadoEn;
   final bool anulada;
   final String? motivoAnulacion;
+  final bool compartido;
 
   String get totalFormateado => 'S/ ${total.toStringAsFixed(2)}';
   String get subtotalFormateado => 'S/ ${subtotal.toStringAsFixed(2)}';
@@ -63,6 +65,7 @@ class Venta {
     DateTime? creadoEn,
     bool? anulada,
     String? Function()? motivoAnulacion,
+    bool? compartido,
   }) {
     return Venta(
       id: id ?? this.id,
@@ -80,6 +83,7 @@ class Venta {
       anulada: anulada ?? this.anulada,
       motivoAnulacion:
           motivoAnulacion != null ? motivoAnulacion() : this.motivoAnulacion,
+      compartido: compartido ?? this.compartido,
     );
   }
 
@@ -99,6 +103,7 @@ class Venta {
       'creadoEn': creadoEn.toIso8601String(),
       'anulada': anulada,
       'motivoAnulacion': motivoAnulacion,
+      'compartido': compartido,
     };
   }
 
@@ -127,6 +132,7 @@ class Venta {
       creadoEn: DateTime.parse(map['creadoEn'] as String),
       anulada: map['anulada'] == true,
       motivoAnulacion: map['motivoAnulacion'] as String?,
+      compartido: map['compartido'] == true,
     );
   }
 
@@ -148,7 +154,8 @@ class Venta {
           cliente == other.cliente &&
           creadoEn == other.creadoEn &&
           anulada == other.anulada &&
-          motivoAnulacion == other.motivoAnulacion;
+          motivoAnulacion == other.motivoAnulacion &&
+          compartido == other.compartido;
 
   @override
   int get hashCode => Object.hash(
@@ -166,5 +173,6 @@ class Venta {
         creadoEn,
         anulada,
         motivoAnulacion,
+        compartido,
       );
 }

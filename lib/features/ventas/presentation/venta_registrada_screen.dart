@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ferrodoc_app/features/comprobantes/presentation/comprobante_preview_screen.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/venta.dart';
+import 'package:ferrodoc_app/features/ventas/presentation/detalle_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
@@ -21,135 +23,21 @@ class VentaRegistradaScreen extends StatelessWidget {
   }
 
   void _onEnviarComprobante(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Comprobante listo para enviar a ${venta.cliente?.telefono ?? "WhatsApp"} (Disponible en Etapa 3)',
-        ),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ComprobantePreviewScreen(venta: venta),
       ),
     );
   }
 
   void _onVerDetalle(BuildContext context) {
-    final colors = AppColors.of(context);
-    final shapes = AppShapes.of(context);
-    final typography = AppTypography.of(context);
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: colors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(shapes.radiusLarge),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => DetalleVentaScreen(
+          ventaId: venta.id,
+          initialVenta: venta,
         ),
       ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          maxChildSize: 0.85,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: EdgeInsetsDirectional.all(shapes.spaceBase),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colors.hairline,
-                        borderRadius: shapes.pillBorderRadius,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: shapes.spaceBase),
-                  Text(
-                    'Detalle de la venta ${venta.numeroVenta}',
-                    style: typography.titleSection.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: shapes.spaceSmall),
-                  Divider(color: colors.hairline),
-                  Expanded(
-                    child: ListView.separated(
-                      controller: scrollController,
-                      itemCount: venta.lineas.length,
-                      separatorBuilder: (_, index) =>
-                          Divider(color: colors.hairline, height: 1),
-                      itemBuilder: (context, index) {
-                        final linea = venta.lineas[index];
-                        return Padding(
-                          padding: EdgeInsetsDirectional.symmetric(
-                            vertical: shapes.spaceSmall,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      linea.nombre,
-                                      style: typography.bodyMedium.copyWith(
-                                        color: colors.onSurface,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${linea.cantidad} x S/ ${linea.precioUnitario.toStringAsFixed(2)}',
-                                      style: typography.labelSubtle.copyWith(
-                                        color: colors.onSurfaceMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                'S/ ${linea.subtotal.toStringAsFixed(2)}',
-                                style: typography.bodyMedium.copyWith(
-                                  color: colors.onSurface,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Divider(color: colors.hairline),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total pagado:',
-                        style: typography.titleSection.copyWith(
-                          color: colors.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'S/ ${venta.total.toStringAsFixed(2)}',
-                        style: typography.titleSection.copyWith(
-                          color: colors.onSurface,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: shapes.spaceBase),
-                ],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
