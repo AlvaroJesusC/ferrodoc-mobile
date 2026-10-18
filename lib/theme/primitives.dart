@@ -56,6 +56,18 @@ abstract final class Primitives {
   static const neutral800 = Color(0xFF1E293B);
   static const neutral900 = Color(0xFF0F172A);
 
+  // Paleta de Errores y Validaciones (Rojo Alerta)
+  static const errorPrimary = Color(0xFFDC2626);
+  static const errorLight = Color(0xFFFEE2E2);
+  static const errorDark = Color(0xFF991B1B);
+  static const errorBorder = Color(0xFFFECACA);
+
+  // Chips de Estado Inactivo
+  static const inactiveBgLight = Color(0xFFE2E8F0);
+  static const inactiveTextLight = Color(0xFF64748B);
+  static const inactiveBgDark = Color(0xFF334155);
+  static const inactiveTextDark = Color(0xFF94A3B8);
+
   // Sombras y bordes
   static const shadowLight = Color(0x0C0F172A);
   static const shadowDark = Color(0x33000000);

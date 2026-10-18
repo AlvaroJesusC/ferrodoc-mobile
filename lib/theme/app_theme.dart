@@ -28,7 +28,7 @@ ThemeData buildAppTheme(Brightness brightness) {
     onSurfaceVariant: colors.onSurfaceMuted,
     outline: colors.hairline,
     outlineVariant: colors.hairline,
-    error: colors.backupButton,
+    error: colors.error,
     onError: colors.onPrimary,
   );
 

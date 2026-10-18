@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -45,12 +46,7 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
         descripcion: 'Nueva venta (carrito) e historial de ventas.',
         icono: Icons.point_of_sale_outlined,
       ),
-      const _FeatureTabPlaceholder(
-        codigo: 'P09',
-        titulo: 'Catálogo',
-        descripcion: 'Gestión de productos y precios para caja.',
-        icono: Icons.inventory_2_outlined,
-      ),
+      const CatalogoScreen(),
       const _FeatureTabPlaceholder(
         codigo: 'P03',
         titulo: 'Más',
