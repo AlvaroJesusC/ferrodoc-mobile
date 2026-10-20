@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/lista_documentos_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
+import 'package:ferrodoc_app/features/mas/presentation/mas_menu_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/nueva_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
-import 'package:ferrodoc_app/theme/app_shapes.dart';
-import 'package:ferrodoc_app/theme/app_typography.dart';
 
 /// Contenedor raíz con las 5 pestañas de la barra inferior especificadas en P01-P24:
 /// 1. Inicio (P02)
@@ -39,12 +38,7 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
       const ListaDocumentosScreen(),
       const NuevaVentaScreen(),
       const CatalogoScreen(),
-      const _FeatureTabPlaceholder(
-        codigo: 'P03',
-        titulo: 'Más',
-        descripcion: 'Reportes, Cierre de caja, Respaldo y Configuración AYM.',
-        icono: Icons.more_horiz_outlined,
-      ),
+      const MasMenuScreen(),
     ];
 
     return Scaffold(
@@ -93,65 +87,6 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
               label: 'Más',
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Vista placeholder para las demás pestañas que preserva la consistencia de diseño.
-class _FeatureTabPlaceholder extends StatelessWidget {
-  const _FeatureTabPlaceholder({
-    required this.codigo,
-    required this.titulo,
-    required this.descripcion,
-    required this.icono,
-  });
-
-  final String codigo;
-  final String titulo;
-  final String descripcion;
-  final IconData icono;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final shapes = AppShapes.of(context);
-    final typography = AppTypography.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '$titulo ($codigo)',
-          style: typography.titleSection.copyWith(color: colors.onSurface),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsetsDirectional.all(shapes.spaceXLarge),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icono,
-                size: shapes.spaceXXLarge + shapes.spaceLarge,
-                color: colors.primary,
-              ),
-              SizedBox(height: shapes.spaceLarge),
-              Text(
-                titulo,
-                style: typography.titleHeader.copyWith(color: colors.onSurface),
-              ),
-              SizedBox(height: shapes.spaceSmall),
-              Text(
-                descripcion,
-                style: typography.bodyRegular.copyWith(
-                  color: colors.onSurfaceMuted,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
         ),
       ),
     );

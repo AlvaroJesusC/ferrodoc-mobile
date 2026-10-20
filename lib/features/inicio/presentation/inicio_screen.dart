@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/features/documentos/presentation/escaner_documentos_screen.dart';
+import 'package:ferrodoc_app/features/documentos/presentation/visor_documento_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/controllers/inicio_controller.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/backup_warning_card.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/inicio_app_bar.dart';
@@ -7,7 +9,7 @@ import 'package:ferrodoc_app/features/inicio/presentation/widgets/quick_actions_
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/terminal_header_card.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ultimos_documentos_section.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ventas_resumen_card.dart';
-import 'package:ferrodoc_app/features/documentos/presentation/escaner_documentos_screen.dart';
+import 'package:ferrodoc_app/features/reportes/presentation/reporte_ventas_screen.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 
 /// Pantalla principal P02 — Inicio de ferrodoc_app.
@@ -78,8 +80,11 @@ class InicioScreen extends ConsumerWidget {
               // Tarjeta Resumen de Ventas de Hoy
               VentasResumenCard(
                 resumen: state.resumenVentas,
-                onVerReporte: () =>
-                    _showNotice(context, 'Navegando a P18 — Reporte de ventas'),
+                onVerReporte: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => const ReporteVentasScreen(),
+                  ),
+                ),
                 onNuevaVenta: () {
                   if (onNavigateToTab != null) {
                     onNavigateToTab!(2);
@@ -130,9 +135,11 @@ class InicioScreen extends ConsumerWidget {
                     builder: (context) => const EscanerDocumentosScreen(),
                   ),
                 ),
-                onDocumentoTap: (doc) => _showNotice(
-                  context,
-                  'Navegando a P07 — Visor de "${doc.titulo}"',
+                onDocumentoTap: (doc) => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) =>
+                        VisorDocumentoScreen(documentoId: doc.id),
+                  ),
                 ),
               ),
 
