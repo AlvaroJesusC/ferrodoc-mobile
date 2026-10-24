@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/core/demo/widgets/demo_mode_card.dart';
 import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/configuracion/domain/models/configuracion_negocio.dart';
 import 'package:ferrodoc_app/features/configuracion/presentation/widgets/comprobante_mini_preview.dart';
@@ -7,6 +8,7 @@ import 'package:ferrodoc_app/features/configuracion/presentation/widgets/metodos
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
+import 'package:ferrodoc_app/theme/widgets/theme_selector_card.dart';
 
 /// Pantalla P23 — Configuración del negocio y del comprobante (F20, F11).
 class ConfiguracionNegocioScreen extends ConsumerStatefulWidget {
@@ -374,6 +376,16 @@ class _ConfiguracionNegocioScreenState
                   onAgregarMetodo: _mostrarDialogoAgregarMetodo,
                   onQuitarMetodo: _quitarMetodo,
                 ),
+
+                SizedBox(height: shapes.spaceLarge),
+
+                // Sección Apariencia (Modo Claro / Modo Oscuro)
+                const ThemeSelectorCard(),
+
+                SizedBox(height: shapes.spaceLarge),
+
+                // Sección Modo Demostración (MVP)
+                const DemoModeCard(),
 
                 SizedBox(height: shapes.spaceXXLarge),
               ],

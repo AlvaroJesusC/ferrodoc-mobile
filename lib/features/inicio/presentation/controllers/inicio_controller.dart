@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/core/demo/demo_mode_provider.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
@@ -12,14 +14,18 @@ import 'package:ferrodoc_app/features/ventas/domain/models/venta.dart';
 /// Cumple con las directrices innegociables:
 /// 1. Inicia estrictamente en estado cero (`S/ 0.00`) y listas vacías.
 /// 2. Conectado en tiempo real a las ventas y documentos locales (Etapa 5).
-/// 3. Ofrece la posibilidad de alternar a los datos de muestra visual de Stitch AI
-///    para probar y verificar que los widgets con datos renderizan perfectamente.
+/// 3. Sincronizado con [demoModeProvider] para el Modo Demostración del MVP.
 class InicioNotifier extends Notifier<InicioUiState> {
-  bool _isDemoMode = false;
   int _diasSinRespaldo = 8;
 
   @override
   InicioUiState build() {
+    final now = DateTime.now();
+    final fechaHoyTexto = formatearFechaHoy(now);
+    final fechaCortaHoy =
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+
+    final isDemo = ref.watch(demoModeProvider);
     final AsyncValue<List<Venta>> ventasAsync = ref.watch(watchVentasProvider);
     final List<Venta> ventas = ventasAsync.value ?? const [];
 
@@ -27,7 +33,7 @@ class InicioNotifier extends Notifier<InicioUiState> {
         ref.watch(watchDocumentosProvider);
     final List<Documento> documentos = docsAsync.value ?? const [];
 
-    if (_isDemoMode) {
+    if (isDemo && ventas.isEmpty && documentos.isEmpty) {
       return InicioUiState(
         diasSinRespaldo: _diasSinRespaldo,
         resumenVentas: const ResumenVentasDia(
@@ -37,12 +43,12 @@ class InicioNotifier extends Notifier<InicioUiState> {
           yapePlin: 380.00,
           tarjeta: 120.00,
         ),
-        documentos: const [
+        documentos: [
           DocumentoReciente(
             id: 'doc-1',
             titulo: 'Factura – Aceros Arequipa',
             tipo: 'Factura',
-            fecha: '16/10/2026',
+            fecha: fechaCortaHoy,
             montoOInfo: 'S/ 4,820.00',
             estado: 'Validado',
             isFactura: true,
@@ -51,20 +57,18 @@ class InicioNotifier extends Notifier<InicioUiState> {
             id: 'doc-2',
             titulo: 'Guía – Cementos Sol',
             tipo: 'Guía de remisión',
-            fecha: '16/10/2026',
+            fecha: fechaCortaHoy,
             montoOInfo: '80 Bolsas',
             estado: 'En almacén',
             isFactura: false,
           ),
         ],
         isLocalActivo: true,
-        fechaHoyTexto: 'Viernes, 16 de octubre de 2026',
+        fechaHoyTexto: fechaHoyTexto,
         nombreNegocio: 'Ferretería AYM',
         isDemoMode: true,
       );
     }
-
-    final now = DateTime.now();
     final List<Venta> ventasHoy = ventas.where((Venta v) {
       if (v.anulada) return false;
       return v.creadoEn.year == now.year &&
@@ -123,23 +127,52 @@ class InicioNotifier extends Notifier<InicioUiState> {
       resumenVentas: resumen,
       documentos: docsRecientes,
       isLocalActivo: true,
-      fechaHoyTexto: 'Viernes, 16 de octubre de 2026',
+      fechaHoyTexto: fechaHoyTexto,
       nombreNegocio: 'Ferretería AYM',
-      isDemoMode: false,
+      isDemoMode: isDemo,
     );
   }
 
   /// Alterna entre el estado reactivo real (inicia en cero/vacío) y
-  /// la simulación con los datos de muestra de la maqueta de Stitch AI.
+  /// la carga de datos del Modo Demostración del MVP.
   void toggleDemoMode() {
-    _isDemoMode = !_isDemoMode;
-    ref.invalidateSelf();
+    unawaited(ref.read(demoModeProvider.notifier).toggleDemoMode());
   }
 
   void dismissBackupWarning() {
     _diasSinRespaldo = 0;
     ref.invalidateSelf();
   }
+}
+
+/// Formatea una fecha según el formato oficial en español: ej. "Viernes, 24 de octubre de 2026".
+String formatearFechaHoy(DateTime date) {
+  const dias = [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo',
+  ];
+  const meses = [
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'setiembre',
+    'octubre',
+    'noviembre',
+    'diciembre',
+  ];
+  final diaSemana = dias[date.weekday - 1];
+  final mes = meses[date.month - 1];
+  return '$diaSemana, ${date.day} de $mes de ${date.year}';
 }
 
 /// Proveedor de estado de Inicio conectado reactivamente (P02, F14).

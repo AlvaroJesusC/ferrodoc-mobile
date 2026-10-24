@@ -50,11 +50,11 @@ class InicioAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        // Selector rápido para auditar/probar el Estado Inicial en Cero vs Mockup Stitch AI
+        // Selector rápido para activar/desactivar Modo Demo MVP vs Estado Inicial en 0
         IconButton(
           tooltip: isDemoActive
-              ? 'Ver estado inicial en 0'
-              : 'Ver datos de muestra Stitch AI',
+              ? 'Desactivar Modo Demo (volver a 0)'
+              : 'Activar Modo Demo MVP (cargar datos)',
           onPressed: onToggleDemoTap,
           icon: Icon(
             isDemoActive

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ferrodoc_app/core/demo/widgets/demo_mode_card.dart';
 import 'package:ferrodoc_app/features/cierre_caja/presentation/cierre_caja_screen.dart';
 import 'package:ferrodoc_app/features/configuracion/presentation/configuracion_negocio_screen.dart';
 import 'package:ferrodoc_app/features/mas/presentation/widgets/mas_menu_item_tile.dart';
@@ -9,6 +10,7 @@ import 'package:ferrodoc_app/features/seguridad/presentation/seguridad_screen.da
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
+import 'package:ferrodoc_app/theme/widgets/theme_selector_card.dart';
 
 /// Pantalla P03 — Menú Más (Pestaña 5).
 ///
@@ -156,6 +158,29 @@ class MasMenuScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+            SizedBox(height: shapes.spaceLarge),
+
+            // Sección Demostración MVP y Apariencia
+            Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: shapes.spaceXSmall,
+                bottom: shapes.spaceSmall,
+              ),
+              child: Text(
+                'PRESENTACIÓN Y APARIENCIA',
+                style: typography.badgeLabel.copyWith(
+                  color: colors.onSurfaceMuted,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ),
+
+            const ThemeSelectorCard(),
+
+            SizedBox(height: shapes.spaceMedium),
+
+            const DemoModeCard(),
 
             SizedBox(height: shapes.spaceXXLarge),
 
