@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/lista_documentos_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
 import 'package:ferrodoc_app/features/mas/presentation/mas_menu_screen.dart';
+import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
+import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/nueva_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 
@@ -12,14 +15,16 @@ import 'package:ferrodoc_app/theme/app_colors.dart';
 /// 3. Ventas (P11 / P14)
 /// 4. Catálogo (P09)
 /// 5. Más (P03)
-class MainShellScaffold extends StatefulWidget {
+///
+/// Integra la pantalla de bloqueo P24 cuando la seguridad esté activa y bloqueada.
+class MainShellScaffold extends ConsumerStatefulWidget {
   const MainShellScaffold({super.key});
 
   @override
-  State<MainShellScaffold> createState() => _MainShellScaffoldState();
+  ConsumerState<MainShellScaffold> createState() => _MainShellScaffoldState();
 }
 
-class _MainShellScaffoldState extends State<MainShellScaffold> {
+class _MainShellScaffoldState extends ConsumerState<MainShellScaffold> {
   int _currentIndex = 0;
 
   void _onTabSelected(int index) {
@@ -32,6 +37,14 @@ class _MainShellScaffoldState extends State<MainShellScaffold> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
+    final seguridad = ref.watch(seguridadProvider);
+
+    if (seguridad.bloqueoActivo && !seguridad.estaAutenticado) {
+      return BloqueoScreen(
+        onDesbloqueado: () =>
+            ref.read(seguridadProvider.notifier).desbloquear(),
+      );
+    }
 
     final tabs = [
       InicioScreen(onNavigateToTab: _onTabSelected),

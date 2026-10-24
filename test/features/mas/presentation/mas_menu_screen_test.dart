@@ -88,5 +88,44 @@ void main() {
 
       expect(find.byType(CierreCajaScreen), findsOneWidget);
     });
+
+    testWidgets('navega a Seguridad (P21)', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(_createMasMenuApp(container: container));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Seguridad'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bloquear la app'), findsOneWidget);
+    });
+
+    testWidgets('navega a Respaldo (P22)', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(_createMasMenuApp(container: container));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Respaldo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Crear respaldo'), findsOneWidget);
+    });
+
+    testWidgets('navega a Configuración del negocio (P23)', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(_createMasMenuApp(container: container));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Configuración del negocio'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nombre del negocio'), findsOneWidget);
+    });
   });
 }

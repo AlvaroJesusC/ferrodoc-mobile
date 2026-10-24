@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:ferrodoc_app/features/cierre_caja/presentation/cierre_caja_screen.dart';
+import 'package:ferrodoc_app/features/configuracion/presentation/configuracion_negocio_screen.dart';
 import 'package:ferrodoc_app/features/mas/presentation/widgets/mas_menu_item_tile.dart';
 import 'package:ferrodoc_app/features/reportes/presentation/productos_mas_vendidos_screen.dart';
 import 'package:ferrodoc_app/features/reportes/presentation/reporte_ventas_screen.dart';
+import 'package:ferrodoc_app/features/respaldo/presentation/respaldo_screen.dart';
+import 'package:ferrodoc_app/features/seguridad/presentation/seguridad_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
@@ -18,16 +21,6 @@ import 'package:ferrodoc_app/theme/app_typography.dart';
 /// 6. Configuración del negocio (P23)
 class MasMenuScreen extends StatelessWidget {
   const MasMenuScreen({super.key});
-
-  void _showEtapa6Notice(BuildContext context, String title, String code) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$title ($code) — Disponible en Etapa 6'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +122,11 @@ class MasMenuScreen extends StatelessWidget {
               titulo: 'Seguridad',
               subtitulo: 'Bloqueo por PIN y biometría',
               badgeText: 'P21',
-              onTap: () => _showEtapa6Notice(context, 'Seguridad', 'P21'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const SeguridadScreen(),
+                ),
+              ),
             ),
 
             SizedBox(height: shapes.spaceSmall),
@@ -139,7 +136,11 @@ class MasMenuScreen extends StatelessWidget {
               titulo: 'Respaldo',
               subtitulo: 'Exportación y restauración de datos',
               badgeText: 'P22',
-              onTap: () => _showEtapa6Notice(context, 'Respaldo cifrado', 'P22'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const RespaldoScreen(),
+                ),
+              ),
             ),
 
             SizedBox(height: shapes.spaceSmall),
@@ -149,10 +150,10 @@ class MasMenuScreen extends StatelessWidget {
               titulo: 'Configuración del negocio',
               subtitulo: 'Datos de Ferretería AYM y comprobante',
               badgeText: 'P23',
-              onTap: () => _showEtapa6Notice(
-                context,
-                'Configuración del negocio',
-                'P23',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const ConfiguracionNegocioScreen(),
+                ),
               ),
             ),
 

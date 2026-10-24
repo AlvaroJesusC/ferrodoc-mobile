@@ -57,6 +57,33 @@ class CierreCaja {
     }
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'fecha': fecha.toIso8601String(),
+      'efectivoEsperado': efectivoEsperado,
+      'efectivoContado': efectivoContado,
+      'diferencia': diferencia,
+      'estado': estado.name,
+      'guardadoEn': guardadoEn.toIso8601String(),
+    };
+  }
+
+  factory CierreCaja.fromMap(Map<String, dynamic> map) {
+    return CierreCaja(
+      id: map['id'] as String,
+      fecha: DateTime.parse(map['fecha'] as String),
+      efectivoEsperado: (map['efectivoEsperado'] as num).toDouble(),
+      efectivoContado: (map['efectivoContado'] as num).toDouble(),
+      diferencia: (map['diferencia'] as num).toDouble(),
+      estado: EstadoDiferencia.values.firstWhere(
+        (e) => e.name == map['estado'],
+        orElse: () => EstadoDiferencia.cuadrada,
+      ),
+      guardadoEn: DateTime.parse(map['guardadoEn'] as String),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

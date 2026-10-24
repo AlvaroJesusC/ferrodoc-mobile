@@ -10,6 +10,7 @@ import 'package:ferrodoc_app/features/inicio/presentation/widgets/terminal_heade
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ultimos_documentos_section.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ventas_resumen_card.dart';
 import 'package:ferrodoc_app/features/reportes/presentation/reporte_ventas_screen.dart';
+import 'package:ferrodoc_app/features/respaldo/presentation/respaldo_screen.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 
 /// Pantalla principal P02 — Inicio de ferrodoc_app.
@@ -68,9 +69,10 @@ class InicioScreen extends ConsumerWidget {
                 SizedBox(height: shapes.spaceLarge),
                 BackupWarningCard(
                   diasSinRespaldo: state.diasSinRespaldo,
-                  onRespaldar: () => _showNotice(
-                    context,
-                    'Navegando a P22 — Respaldo cifrado',
+                  onRespaldar: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const RespaldoScreen(),
+                    ),
                   ),
                 ),
               ],
