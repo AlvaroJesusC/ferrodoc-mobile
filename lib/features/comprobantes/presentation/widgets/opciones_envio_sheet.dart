@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_pdf_service.dart';
 import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_share_service.dart';
 import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository_provider.dart';
@@ -107,6 +108,35 @@ class _OpcionesEnvioSheetState extends ConsumerState<OpcionesEnvioSheet> {
           ),
         ),
       );
+    }
+  }
+
+  Future<void> _enviarComoPdf() async {
+    try {
+      final pdfService = ref.read(comprobantePdfServiceProvider);
+      final config = ref.read(configuracionProvider);
+      final path = await pdfService.generarYGuardarPdf(
+        venta: widget.venta,
+        configuracion: config,
+      );
+
+      final shareService = ref.read(comprobanteShareServiceProvider);
+      await shareService.compartirArchivoPdf(
+        pathPdf: path,
+        titulo: 'Comprobante ${widget.venta.numeroVenta}',
+      );
+
+      if (mounted) {
+        await ref
+            .read(ventaRepositoryProvider)
+            .marcarCompartido(widget.venta.id);
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    } catch (_) {
+      // Fallback a compartir resumen en caso de error
+      await _compartirArchivo();
     }
   }
 
@@ -300,7 +330,7 @@ class _OpcionesEnvioSheetState extends ConsumerState<OpcionesEnvioSheet> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _compartirArchivo,
+                    onPressed: _enviarComoPdf,
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
                     label: const Text('Enviar como PDF'),
                     style: OutlinedButton.styleFrom(

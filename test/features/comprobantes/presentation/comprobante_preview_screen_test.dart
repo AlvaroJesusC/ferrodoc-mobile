@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_pdf_service.dart';
 import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_share_service.dart';
 import 'package:ferrodoc_app/features/comprobantes/presentation/comprobante_preview_screen.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository.dart';
@@ -302,6 +303,74 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Número del cliente'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Bloque 4: tocar "Enviar como PDF" en P17 genera el archivo físico y marca la venta como compartida',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final venta = _crearVenta();
+        await ventaRepo.registrarVenta(venta);
+
+        final fakePdfService = FakeComprobantePdfService(mockPdfPath: 'test_path.pdf');
+        const fakeShareService = LocalComprobanteShareService();
+
+        final container = ProviderContainer(
+          overrides: [
+            ventaRepositoryProvider.overrideWithValue(ventaRepo),
+            comprobantePdfServiceProvider.overrideWithValue(fakePdfService),
+            comprobanteShareServiceProvider.overrideWithValue(fakeShareService),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          _buildComprobanteApp(container: container, venta: venta),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Enviar por WhatsApp'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Enviar como PDF'));
+        await tester.pumpAndSettle();
+
+        expect(fakePdfService.generateCallCount, 1);
+        final ventaActualizada = await ventaRepo.getVentaById(venta.id);
+        expect(ventaActualizada?.compartido, isTrue);
+      },
+    );
+
+    testWidgets(
+      'Bloque 4: AppBar contiene botón de impresión directa con tooltip oficial',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final venta = _crearVenta();
+        await ventaRepo.registrarVenta(venta);
+
+        final container = ProviderContainer(
+          overrides: [
+            ventaRepositoryProvider.overrideWithValue(ventaRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          _buildComprobanteApp(container: container, venta: venta),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.print_outlined), findsOneWidget);
+        expect(find.byTooltip('Imprimir comprobante'), findsOneWidget);
       },
     );
   });

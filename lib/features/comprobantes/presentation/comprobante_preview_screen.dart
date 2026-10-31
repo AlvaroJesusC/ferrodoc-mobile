@@ -1,5 +1,8 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
+import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_pdf_service.dart';
 import 'package:ferrodoc_app/features/comprobantes/domain/services/comprobante_share_service.dart';
 import 'package:ferrodoc_app/features/comprobantes/presentation/widgets/opciones_envio_sheet.dart';
 import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
@@ -38,15 +41,27 @@ class _ComprobantePreviewScreenState
   Future<void> _compartirDeOtraForma() async {
     final shareService = ref.read(comprobanteShareServiceProvider);
     final config = ref.read(configuracionProvider);
-    final contenido = shareService.formatearMensajeWhatsApp(
-      venta: widget.venta,
-      configuracion: config,
-    );
 
-    await shareService.compartirSistema(
-      titulo: 'Comprobante ${widget.venta.numeroVenta}',
-      contenido: contenido,
-    );
+    try {
+      final pdfService = ref.read(comprobantePdfServiceProvider);
+      final pdfPath = await pdfService.generarYGuardarPdf(
+        venta: widget.venta,
+        configuracion: config,
+      );
+      await shareService.compartirArchivoPdf(
+        pathPdf: pdfPath,
+        titulo: 'Comprobante ${widget.venta.numeroVenta}',
+      );
+    } catch (_) {
+      final contenido = shareService.formatearMensajeWhatsApp(
+        venta: widget.venta,
+        configuracion: config,
+      );
+      await shareService.compartirSistema(
+        titulo: 'Comprobante ${widget.venta.numeroVenta}',
+        contenido: contenido,
+      );
+    }
 
     if (mounted) {
       await ref
@@ -83,6 +98,24 @@ class _ComprobantePreviewScreenState
         backgroundColor: colors.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          IconButton(
+            tooltip: 'Imprimir comprobante',
+            icon: const Icon(Icons.print_outlined),
+            onPressed: () async {
+              if (Platform.environment.containsKey('FLUTTER_TEST')) return;
+              final pdfService = ref.read(comprobantePdfServiceProvider);
+              final bytes = await pdfService.generarPdfBytes(
+                venta: widget.venta,
+                configuracion: config,
+              );
+              await Printing.layoutPdf(
+                onLayout: (format) async => bytes,
+                name: 'Comprobante-${widget.venta.numeroVenta}',
+              );
+            },
+          ),
+        ],
       ),
       body: _hasError
           ? Center(

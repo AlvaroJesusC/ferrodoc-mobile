@@ -66,5 +66,37 @@ void main() {
       );
       expect(resultado2, isFalse);
     });
+
+    test('LocalComprobanteShareService compartirArchivoPdf retorna true', () async {
+      const service = LocalComprobanteShareService();
+      final res = await service.compartirArchivoPdf(
+        pathPdf: 'test.pdf',
+        titulo: 'Comprobante',
+      );
+      expect(res, isTrue);
+    });
+
+    test('DeviceComprobanteShareService formatea y despacha de forma segura en entorno de test', () async {
+      const deviceService = DeviceComprobanteShareService();
+      final mensaje = deviceService.formatearMensajeWhatsApp(
+        venta: venta,
+        configuracion: config,
+      );
+      expect(mensaje, contains('Ferretería AYM'));
+      expect(mensaje, contains('V-000001'));
+
+      expect(
+        await deviceService.enviarWhatsApp(telefono: '987654321', mensaje: mensaje),
+        isTrue,
+      );
+      expect(
+        await deviceService.compartirSistema(titulo: 'Comprobante', contenido: mensaje),
+        isTrue,
+      );
+      expect(
+        await deviceService.compartirArchivoPdf(pathPdf: 'dummy.pdf', titulo: 'Comprobante'),
+        isTrue,
+      );
+    });
   });
 }
