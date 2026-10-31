@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/domain/models/seguridad_state.dart';
+import 'package:ferrodoc_app/features/seguridad/domain/services/biometrics_service.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -98,6 +99,36 @@ class _SeguridadScreenState extends ConsumerState<SeguridadScreen> {
       _mostrarAviso('PIN cambiado');
     } else {
       _mostrarAviso('PIN actual incorrecto');
+    }
+  }
+
+  Future<void> _toggleHuellaFlujo(bool usar) async {
+    if (!usar) {
+      ref.read(seguridadProvider.notifier).setUsarHuella(false);
+      return;
+    }
+
+    final biometricsService = ref.read(biometricsServiceProvider);
+    final compatible = await biometricsService.canAuthenticate();
+    final tieneHuellas = compatible && await biometricsService.hasBiometricsEnrolled();
+
+    if (!mounted) return;
+
+    if (!compatible || !tieneHuellas) {
+      _mostrarAviso('Tu teléfono no tiene huella configurada');
+      return;
+    }
+
+    final exito = await biometricsService.authenticate(
+      localizedReason: 'Confirma tu huella para activar el acceso biométrico',
+    );
+
+    if (!mounted) return;
+
+    if (exito) {
+      ref.read(seguridadProvider.notifier).setUsarHuella(true);
+    } else {
+      _mostrarAviso('No se reconoció la huella');
     }
   }
 
@@ -270,11 +301,7 @@ class _SeguridadScreenState extends ConsumerState<SeguridadScreen> {
                     // Switch Huella dactilar
                     SwitchListTile(
                       value: seguridad.usarHuella,
-                      onChanged: (usar) {
-                        ref
-                            .read(seguridadProvider.notifier)
-                            .setUsarHuella(usar);
-                      },
+                      onChanged: _toggleHuellaFlujo,
                       title: Text(
                         'Usar huella',
                         style: typography.bodyMedium.copyWith(

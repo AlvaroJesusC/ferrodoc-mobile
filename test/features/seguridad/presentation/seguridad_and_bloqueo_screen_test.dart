@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
+import 'package:ferrodoc_app/features/seguridad/domain/services/biometrics_service.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/seguridad_screen.dart';
 import 'package:ferrodoc_app/theme/app_theme.dart';
@@ -126,6 +127,95 @@ void main() {
         expect(find.text('Crea tu PIN'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Bloque 3: switch Usar huella muestra aviso si teléfono no tiene huella configurada',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: false,
+          hasEnrolled: false,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        // Preactivar bloqueo con PIN
+        container.read(seguridadProvider.notifier).crearPin('1234');
+
+        await tester.pumpWidget(_createSeguridadApp(container: container));
+        await tester.pumpAndSettle();
+
+        final huellaSwitch = find.widgetWithText(SwitchListTile, 'Usar huella');
+        expect(huellaSwitch, findsOneWidget);
+
+        await tester.tap(huellaSwitch);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Tu teléfono no tiene huella configurada'), findsOneWidget);
+        expect(container.read(seguridadProvider).usarHuella, isFalse);
+      },
+    );
+
+    testWidgets(
+      'Bloque 3: switch Usar huella con sensor compatible y autenticación exitosa activa el switch',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: true,
+          hasEnrolled: true,
+          authSuccess: true,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('1234');
+
+        await tester.pumpWidget(_createSeguridadApp(container: container));
+        await tester.pumpAndSettle();
+
+        final huellaSwitch = find.widgetWithText(SwitchListTile, 'Usar huella');
+        await tester.tap(huellaSwitch);
+        await tester.pumpAndSettle();
+
+        expect(fakeBiometrics.authenticateCallCount, 1);
+        expect(container.read(seguridadProvider).usarHuella, isTrue);
+      },
+    );
+
+    testWidgets(
+      'Bloque 3: switch Usar huella con autenticación fallida muestra mensaje y no activa',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: true,
+          hasEnrolled: true,
+          authSuccess: false,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('1234');
+
+        await tester.pumpWidget(_createSeguridadApp(container: container));
+        await tester.pumpAndSettle();
+
+        final huellaSwitch = find.widgetWithText(SwitchListTile, 'Usar huella');
+        await tester.tap(huellaSwitch);
+        await tester.pumpAndSettle();
+
+        expect(find.text('No se reconoció la huella'), findsOneWidget);
+        expect(container.read(seguridadProvider).usarHuella, isFalse);
+      },
+    );
   });
 
   group('P24 — BloqueoScreen Widget Tests', () {
@@ -208,5 +298,122 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets(
+      'Bloque 3: con usarHuella activo, entrada inicial con huella exitosa desbloquea',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: true,
+          hasEnrolled: true,
+          authSuccess: true,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('1234');
+        container.read(seguridadProvider.notifier).setUsarHuella(true);
+        container.read(seguridadProvider.notifier).bloquear();
+
+        bool desbloqueado = false;
+        await tester.pumpWidget(_createBloqueoApp(
+          container: container,
+          onDesbloqueado: () => desbloqueado = true,
+        ));
+        await tester.pumpAndSettle();
+
+        expect(fakeBiometrics.authenticateCallCount, 1);
+        expect(desbloqueado, isTrue);
+      },
+    );
+
+    testWidgets(
+      'Bloque 3: con usarHuella activo, fallo en huella muestra error oficial y permite PIN',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: true,
+          hasEnrolled: true,
+          authSuccess: false,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('1234');
+        container.read(seguridadProvider.notifier).setUsarHuella(true);
+        container.read(seguridadProvider.notifier).bloquear();
+
+        bool desbloqueado = false;
+        await tester.pumpWidget(_createBloqueoApp(
+          container: container,
+          onDesbloqueado: () => desbloqueado = true,
+        ));
+        await tester.pumpAndSettle();
+
+        // Muestra error oficial de huella no reconocida
+        expect(find.text('No se reconoció la huella'), findsOneWidget);
+        expect(desbloqueado, isFalse);
+
+        // Teclado numérico de PIN sigue habilitado: ingresa 1, 2, 3, 4
+        await tester.tap(find.text('1'));
+        await tester.pump();
+        await tester.tap(find.text('2'));
+        await tester.pump();
+        await tester.tap(find.text('3'));
+        await tester.pump();
+        await tester.tap(find.text('4'));
+        await tester.pumpAndSettle();
+
+        expect(desbloqueado, isTrue);
+      },
+    );
+
+    testWidgets(
+      'Bloque 3: tocar botón de huella en teclado solicita autenticación biométrica',
+      (tester) async {
+        final fakeBiometrics = FakeBiometricsService(
+          canAuth: true,
+          hasEnrolled: true,
+          authSuccess: false,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            biometricsServiceProvider.overrideWithValue(fakeBiometrics),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('1234');
+        container.read(seguridadProvider.notifier).setUsarHuella(true);
+        container.read(seguridadProvider.notifier).bloquear();
+
+        bool desbloqueado = false;
+        await tester.pumpWidget(_createBloqueoApp(
+          container: container,
+          onDesbloqueado: () => desbloqueado = true,
+        ));
+        await tester.pumpAndSettle();
+
+        expect(fakeBiometrics.authenticateCallCount, 1);
+        expect(desbloqueado, isFalse);
+
+        // Cambiar resultado a exitoso y tocar ícono de huella
+        fakeBiometrics.authSuccess = true;
+        final huellaIcon = find.byIcon(Icons.fingerprint_rounded);
+        expect(huellaIcon, findsOneWidget);
+
+        await tester.tap(huellaIcon);
+        await tester.pumpAndSettle();
+
+        expect(fakeBiometrics.authenticateCallCount, 2);
+        expect(desbloqueado, isTrue);
+      },
+    );
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
+import 'package:ferrodoc_app/features/seguridad/domain/services/biometrics_service.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/widgets/pin_dots_indicator.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/widgets/pin_keypad.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
@@ -33,6 +34,17 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
   void initState() {
     super.initState();
     _checkPenalizacion();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_autenticarBiometriaInicial());
+    });
+  }
+
+  Future<void> _autenticarBiometriaInicial() async {
+    final state = ref.read(seguridadProvider);
+    if (!state.usarHuella || state.estaEnPenalizacion || !mounted) {
+      return;
+    }
+    await _autenticarConHuellaReal();
   }
 
   void _checkPenalizacion() {
@@ -133,25 +145,36 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
     }
   }
 
-  void _onBiometric() {
-    if (_segundosRestantes > 0) return;
-    final notifier = ref.read(seguridadProvider.notifier);
-    final exito = notifier.autenticarConHuella();
+  Future<void> _autenticarConHuellaReal() async {
+    if (_segundosRestantes > 0 || !mounted) return;
+
+    final biometricsService = ref.read(biometricsServiceProvider);
+    final exito = await biometricsService.authenticate(
+      localizedReason: 'Confirma tu huella para acceder a Ferrodoc',
+    );
+
+    if (!mounted) return;
 
     if (exito) {
-      HapticFeedback.mediumImpact();
+      ref.read(seguridadProvider.notifier).autenticarConHuella(exitoso: true);
+      unawaited(HapticFeedback.mediumImpact());
       if (widget.onDesbloqueado != null) {
         widget.onDesbloqueado!();
       } else {
         Navigator.of(context).pop(true);
       }
     } else {
-      HapticFeedback.heavyImpact();
+      unawaited(HapticFeedback.heavyImpact());
       setState(() {
         _hasError = true;
         _mensajeError = 'No se reconoció la huella';
       });
     }
+  }
+
+  void _onBiometric() {
+    if (_segundosRestantes > 0) return;
+    unawaited(_autenticarConHuellaReal());
   }
 
   void _mostrarOlvidoPin() {
