@@ -219,6 +219,7 @@ class CatalogoScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_catalogo_agregar',
         onPressed: () => _abrirFormulario(context),
         backgroundColor: colors.primary,
         foregroundColor: colors.onPrimary,

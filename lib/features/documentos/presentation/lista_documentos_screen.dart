@@ -80,6 +80,7 @@ class _ListaDocumentosScreenState extends ConsumerState<ListaDocumentosScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_documentos_escanear',
         onPressed: _navegarAEscaner,
         backgroundColor: colors.primary,
         foregroundColor: colors.onPrimary,

@@ -10,6 +10,7 @@ class AppMotion extends ThemeExtension<AppMotion> {
     required this.short,
     required this.medium,
     required this.long,
+    required this.splash,
     required this.enter,
     required this.emphasized,
   });
@@ -17,6 +18,7 @@ class AppMotion extends ThemeExtension<AppMotion> {
   final Duration short;
   final Duration medium;
   final Duration long;
+  final Duration splash;
   final Curve enter;
   final Curve emphasized;
 
@@ -34,6 +36,7 @@ class AppMotion extends ThemeExtension<AppMotion> {
     Duration? short,
     Duration? medium,
     Duration? long,
+    Duration? splash,
     Curve? enter,
     Curve? emphasized,
   }) {
@@ -41,6 +44,7 @@ class AppMotion extends ThemeExtension<AppMotion> {
       short: short ?? this.short,
       medium: medium ?? this.medium,
       long: long ?? this.long,
+      splash: splash ?? this.splash,
       enter: enter ?? this.enter,
       emphasized: emphasized ?? this.emphasized,
     );
@@ -56,6 +60,7 @@ class AppMotion extends ThemeExtension<AppMotion> {
       short: lerpD(short, other.short),
       medium: lerpD(medium, other.medium),
       long: lerpD(long, other.long),
+      splash: lerpD(splash, other.splash),
       enter: t < 0.5 ? enter : other.enter,
       emphasized: t < 0.5 ? emphasized : other.emphasized,
     );
@@ -70,6 +75,7 @@ const defaultAppMotion = AppMotion(
   short: Duration(milliseconds: 120),
   medium: Duration(milliseconds: 250),
   long: Duration(milliseconds: 400),
+  splash: Duration(milliseconds: 800),
   enter: Curves.easeOutCubic,
   emphasized: Curves.fastOutSlowIn,
 );
