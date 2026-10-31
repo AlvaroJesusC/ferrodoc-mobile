@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
+import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/services/documento_share_service.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -99,6 +100,7 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
       text: doc.monto != null ? doc.monto!.toStringAsFixed(2) : '',
     );
     final notaCtrl = TextEditingController(text: doc.nota ?? '');
+    TipoDocumento tipoSel = doc.tipo;
     DateTime fechaSel = doc.fechaComprobante;
 
     final guardado = await showModalBottomSheet<bool>(
@@ -112,11 +114,11 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return Padding(
-              padding: EdgeInsets.only(
-                left: shapes.spaceBase,
-                right: shapes.spaceBase,
+              padding: EdgeInsetsDirectional.only(
+                start: shapes.spaceBase,
+                end: shapes.spaceBase,
                 top: shapes.spaceBase,
-                bottom: MediaQuery.of(context).viewInsets.bottom + shapes.spaceBase,
+                bottom: MediaQuery.viewInsetsOf(context).bottom + shapes.spaceBase,
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -129,6 +131,33 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
                         color: colors.onSurface,
                         fontWeight: FontWeight.w800,
                       ),
+                    ),
+                    SizedBox(height: shapes.spaceBase),
+                    Text(
+                      'Tipo de documento',
+                      style: typography.bodyMedium.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: shapes.spaceXSmall),
+                    Wrap(
+                      spacing: shapes.spaceSmall,
+                      runSpacing: shapes.spaceXSmall,
+                      children: TipoDocumento.values.map((tipo) {
+                        final isSelected = tipoSel == tipo;
+                        return ChoiceChip(
+                          label: Text(tipo.etiqueta),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setSheetState(() {
+                                tipoSel = tipo;
+                              });
+                            }
+                          },
+                        );
+                      }).toList(),
                     ),
                     SizedBox(height: shapes.spaceBase),
                     TextField(
@@ -144,6 +173,34 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
                     TextField(
                       controller: numeroCtrl,
                       decoration: const InputDecoration(labelText: 'Número de comprobante'),
+                    ),
+                    SizedBox(height: shapes.spaceSmall),
+                    InkWell(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: fechaSel,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2030),
+                        );
+                        if (picked != null) {
+                          setSheetState(() {
+                            fechaSel = picked;
+                          });
+                        }
+                      },
+                      child: InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Fecha del comprobante',
+                          suffixIcon: Icon(Icons.calendar_today_outlined),
+                        ),
+                        child: Text(
+                          '${fechaSel.day.toString().padLeft(2, '0')}/${fechaSel.month.toString().padLeft(2, '0')}/${fechaSel.year}',
+                          style: typography.bodyRegular.copyWith(
+                            color: colors.onSurface,
+                          ),
+                        ),
+                      ),
                     ),
                     SizedBox(height: shapes.spaceSmall),
                     TextField(
@@ -183,6 +240,7 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
       final monto = double.tryParse(montoCtrl.text.trim());
 
       final updated = doc.copyWith(
+        tipo: tipoSel,
         titulo: tituloCtrl.text.trim().isNotEmpty ? tituloCtrl.text.trim() : doc.titulo,
         proveedor: proveedorCtrl.text.trim().isNotEmpty ? proveedorCtrl.text.trim() : null,
         numeroComprobante: numeroCtrl.text.trim().isNotEmpty ? numeroCtrl.text.trim() : null,

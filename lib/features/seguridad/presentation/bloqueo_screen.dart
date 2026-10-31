@@ -179,9 +179,11 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
     final typography = AppTypography.of(context);
     final seguridad = ref.watch(seguridadProvider);
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      body: SafeArea(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: colors.surface,
+        body: SafeArea(
         child: Column(
           children: [
             const Spacer(flex: 2),
@@ -272,6 +274,7 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
             SizedBox(height: shapes.spaceBase),
           ],
         ),
+      ),
       ),
     );
   }

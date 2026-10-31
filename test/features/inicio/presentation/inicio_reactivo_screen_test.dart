@@ -9,6 +9,7 @@ import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.da
 import 'package:ferrodoc_app/features/documentos/presentation/visor_documento_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
 import 'package:ferrodoc_app/features/reportes/presentation/reporte_ventas_screen.dart';
+import 'package:ferrodoc_app/features/respaldo/data/respaldo_provider.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository_provider.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/linea_venta.dart';
@@ -175,5 +176,40 @@ void main() {
 
       expect(find.byType(VisorDocumentoScreen), findsOneWidget);
     });
+
+    testWidgets(
+      'FIX-06 y FIX-10: muestra ícono de tienda, botón Escanear documento y aviso de respaldo',
+      (tester) async {
+        final container = ProviderContainer(
+          overrides: [
+            ventaRepositoryProvider.overrideWithValue(ventaRepo),
+            documentoRepositoryProvider.overrideWithValue(docRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(_createInicioApp(container: container));
+        await tester.pumpAndSettle();
+
+        expect(find.byTooltip('Configuración del negocio'), findsOneWidget);
+        expect(find.byIcon(Icons.person_outline), findsNothing);
+        expect(find.text('Modo Demo'), findsOneWidget);
+        expect(find.text('Escanear documento'), findsOneWidget);
+        expect(find.text('Hace 8 días sin respaldo'), findsOneWidget);
+        expect(find.text('Protege tus documentos y ventas'), findsOneWidget);
+        expect(find.text('Respaldar'), findsOneWidget);
+
+        // FIX-15: Al crear un respaldo en respaldoProvider, el aviso de días sin respaldo desaparece automáticamente
+        final futureRespaldo = container
+            .read(respaldoProvider.notifier)
+            .crearRespaldo('clave123');
+        await tester.pump(const Duration(milliseconds: 300));
+        final exito = await futureRespaldo;
+        expect(exito, isTrue);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Hace 8 días sin respaldo'), findsNothing);
+      },
+    );
   });
 }

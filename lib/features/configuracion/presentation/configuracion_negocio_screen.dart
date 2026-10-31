@@ -209,6 +209,19 @@ class _ConfiguracionNegocioScreenState
   }
 
   void _quitarMetodo(String metodo) {
+    if (_metodosPago.length <= 1) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Debe quedar al menos un método de pago activo',
+          ),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

@@ -47,6 +47,11 @@ void main() {
         // Pie de versión y negocio
         expect(find.text('Ferrodoc v1.0.0 (Local)'), findsOneWidget);
         expect(find.text('Ferretería AYM · 100% Sin conexión'), findsOneWidget);
+
+        // FIX-07: No expone códigos técnicos internos P21, P22, P23
+        expect(find.text('P21'), findsNothing);
+        expect(find.text('P22'), findsNothing);
+        expect(find.text('P23'), findsNothing);
       },
     );
 

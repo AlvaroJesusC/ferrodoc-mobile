@@ -242,6 +242,24 @@ void main() {
       expect(find.text('Editar datos'), findsOneWidget);
       expect(find.text('Compartir'), findsOneWidget);
       expect(find.text('Eliminar'), findsOneWidget);
+
+      // FIX-11: Abrir "Editar datos" y verificar que incluye Tipo de documento y Fecha del comprobante
+      await tester.tap(find.text('Editar datos'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tipo de documento'), findsOneWidget);
+      expect(find.text('Fecha del comprobante'), findsOneWidget);
+      expect(find.text('Guía de remisión'), findsOneWidget);
+
+      // Cambiar tipo a Guía de remisión y guardar
+      await tester.tap(find.text('Guía de remisión'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Guardar cambios'));
+      await tester.tap(find.text('Guardar cambios'));
+      await tester.pumpAndSettle();
+
+      final actualizado = await docRepo.getDocumentoById(doc.id);
+      expect(actualizado?.tipo, equals(TipoDocumento.guia));
     });
 
     testWidgets('archivo inexistente muestra mensaje oficial y opción Eliminar registro', (tester) async {

@@ -54,6 +54,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nueva venta'), findsOneWidget);
+      expect(find.text('Producto libre'), findsOneWidget);
+      expect(find.text('Ir al catálogo de productos'), findsOneWidget);
       expect(find.text('Toca un producto para agregarlo'), findsOneWidget);
 
       final cobrarButtonFinder = find.widgetWithText(FilledButton, 'Cobrar');
@@ -109,6 +111,46 @@ void main() {
 
       expect(find.text('No encontramos ese producto'), findsOneWidget);
       expect(find.text('Agregar como producto libre'), findsOneWidget);
+    });
+
+    testWidgets(
+        'FIX-01: CarritoDetalleSheet actualiza cantidades en vivo y muestra botón Cobrar',
+        (tester) async {
+      await prodRepo.saveProducto(
+        _prod('p1', 'Martillo Truper', 25.00),
+      );
+
+      await tester.pumpWidget(_createVentaApp(prodRepo: prodRepo));
+      await tester.pumpAndSettle();
+
+      // Agregar al carrito
+      await tester.tap(find.byType(ProductoGridCard));
+      await tester.pumpAndSettle();
+
+      // Abrir hoja de detalle del carrito tocando el resumen
+      await tester.tap(find.text('1 producto · 1 unidad'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Detalle del carrito'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Cobrar S/ 25.00'), findsWidgets);
+
+      // Tocar '+' dentro de la hoja modal
+      final addIconInSheet = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byIcon(Icons.add),
+      );
+      await tester.tap(addIconInSheet);
+      await tester.pumpAndSettle();
+
+      // Debe actualizarse en vivo a 2 unidades y S/ 50.00 sin cerrar la hoja
+      expect(find.text('Detalle del carrito'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.widgetWithText(FilledButton, 'Cobrar S/ 50.00'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

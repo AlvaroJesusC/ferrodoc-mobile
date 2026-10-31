@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/domain/models/seguridad_state.dart';
@@ -102,31 +103,54 @@ class _SeguridadScreenState extends ConsumerState<SeguridadScreen> {
 
   Future<String?> _mostrarDialogoPin(String titulo) {
     final ctrl = TextEditingController();
+    String? errorText;
     return showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(titulo),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          obscureText: true,
-          maxLength: 6,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: '4 a 6 dígitos',
-            prefixIcon: Icon(Icons.pin_outlined),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: Text(titulo),
+          content: TextField(
+            controller: ctrl,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            obscureText: true,
+            maxLength: 6,
+            autofocus: true,
+            onChanged: (_) {
+              if (errorText != null) {
+                setDialogState(() {
+                  errorText = null;
+                });
+              }
+            },
+            decoration: InputDecoration(
+              hintText: '4 a 6 dígitos',
+              errorText: errorText,
+              prefixIcon: const Icon(Icons.pin_outlined),
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final pin = ctrl.text.trim();
+                if (pin.length < 4 || pin.length > 6) {
+                  setDialogState(() {
+                    errorText = 'Ingresa entre 4 y 6 dígitos';
+                  });
+                  return;
+                }
+                Navigator.of(ctx).pop(pin);
+              },
+              child: const Text('Continuar'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-            child: const Text('Continuar'),
-          ),
-        ],
       ),
     );
   }

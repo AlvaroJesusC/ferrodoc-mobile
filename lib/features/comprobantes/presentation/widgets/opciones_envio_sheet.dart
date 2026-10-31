@@ -256,6 +256,19 @@ class _OpcionesEnvioSheetState extends ConsumerState<OpcionesEnvioSheet> {
                           ),
                         ),
                       ),
+                    ] else if (widget.venta.cliente?.telefono != null) ...[
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _mostrarInputTelefono = true;
+                            });
+                          },
+                          icon: const Icon(Icons.edit_outlined, size: 16),
+                          label: const Text('Cambiar número'),
+                        ),
+                      ),
                     ],
                     SizedBox(height: shapes.spaceBase),
                     FilledButton.icon(
@@ -282,7 +295,56 @@ class _OpcionesEnvioSheetState extends ConsumerState<OpcionesEnvioSheet> {
 
             SizedBox(height: shapes.spaceBase),
 
-            // Opción 2: Enviar archivo / Compartir sistema
+            // Opción 2: Enviar archivo en formato PDF o Imagen (FIX-12)
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _compartirArchivo,
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    label: const Text('Enviar como PDF'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.onSurface,
+                      side: BorderSide(
+                        color: colors.hairline,
+                        width: colors.hairlineWidth,
+                      ),
+                      padding: EdgeInsetsDirectional.symmetric(
+                        vertical: shapes.spaceMedium,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: shapes.cardBorderRadius,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: shapes.spaceSmall),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _compartirArchivo,
+                    icon: const Icon(Icons.image_outlined, size: 18),
+                    label: const Text('Enviar como Imagen'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.onSurface,
+                      side: BorderSide(
+                        color: colors.hairline,
+                        width: colors.hairlineWidth,
+                      ),
+                      padding: EdgeInsetsDirectional.symmetric(
+                        vertical: shapes.spaceMedium,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: shapes.cardBorderRadius,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: shapes.spaceSmall),
+
+            // Opción 3: Compartir mediante hoja del sistema
             OutlinedButton.icon(
               onPressed: _compartirArchivo,
               icon: const Icon(Icons.share_outlined, size: 20),

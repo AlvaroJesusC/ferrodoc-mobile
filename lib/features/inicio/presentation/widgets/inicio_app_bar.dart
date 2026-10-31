@@ -50,37 +50,80 @@ class InicioAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        // Selector rápido para activar/desactivar Modo Demo MVP vs Estado Inicial en 0
-        IconButton(
-          tooltip: isDemoActive
-              ? 'Desactivar Modo Demo (volver a 0)'
-              : 'Activar Modo Demo MVP (cargar datos)',
-          onPressed: onToggleDemoTap,
-          icon: Icon(
-            isDemoActive
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
-            color: isDemoActive ? colors.primary : colors.onSurfaceMuted,
+        // Selector claro para activar/desactivar Modo Demo MVP vs Estado Inicial en 0
+        Padding(
+          padding: EdgeInsetsDirectional.only(end: shapes.spaceSmall),
+          child: Tooltip(
+            message: isDemoActive
+                ? 'Desactivar Modo Demo (volver a 0)'
+                : 'Activar Modo Demo MVP (cargar datos)',
+            child: InkWell(
+              onTap: onToggleDemoTap,
+              borderRadius: shapes.pillBorderRadius,
+              child: Container(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: shapes.spaceSmall,
+                  vertical: shapes.spaceXSmall,
+                ),
+                decoration: BoxDecoration(
+                  color: isDemoActive
+                      ? colors.primaryContainer
+                      : colors.scaffoldBackground,
+                  borderRadius: shapes.pillBorderRadius,
+                  border: Border.all(
+                    color: isDemoActive ? colors.primary : colors.hairline,
+                    width: colors.hairlineWidth,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isDemoActive
+                          ? Icons.science
+                          : Icons.science_outlined,
+                      size: 16,
+                      color: isDemoActive
+                          ? colors.primary
+                          : colors.onSurfaceMuted,
+                    ),
+                    SizedBox(width: shapes.spaceXSmall),
+                    Text(
+                      'Modo Demo',
+                      style: typography.badgeLabel.copyWith(
+                        color: isDemoActive
+                            ? colors.primary
+                            : colors.onSurfaceMuted,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
 
         // Acceso directo a Configuración del negocio (P23 / Ferretería AYM)
         Padding(
           padding: EdgeInsetsDirectional.only(end: shapes.spaceBase),
-          child: InkWell(
-            onTap: onSettingsTap,
-            borderRadius: shapes.pillBorderRadius,
-            child: Container(
-              width: shapes.spaceXXLarge + shapes.spaceSmall,
-              height: shapes.spaceXXLarge + shapes.spaceSmall,
-              decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.person_outline,
-                color: colors.primary,
-                size: shapes.spaceXLarge,
+          child: Tooltip(
+            message: 'Configuración del negocio',
+            child: InkWell(
+              onTap: onSettingsTap,
+              borderRadius: shapes.pillBorderRadius,
+              child: Container(
+                width: shapes.spaceXXLarge + shapes.spaceSmall,
+                height: shapes.spaceXXLarge + shapes.spaceSmall,
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.storefront_outlined,
+                  color: colors.primary,
+                  size: shapes.spaceXLarge,
+                ),
               ),
             ),
           ),

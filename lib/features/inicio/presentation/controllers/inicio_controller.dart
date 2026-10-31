@@ -5,6 +5,7 @@ import 'package:ferrodoc_app/features/documentos/data/repositories/documento_rep
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
 import 'package:ferrodoc_app/features/inicio/domain/models/inicio_state_data.dart';
+import 'package:ferrodoc_app/features/respaldo/data/respaldo_provider.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository_provider.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/metodo_pago.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/venta.dart';
@@ -33,9 +34,16 @@ class InicioNotifier extends Notifier<InicioUiState> {
         ref.watch(watchDocumentosProvider);
     final List<Documento> documentos = docsAsync.value ?? const [];
 
+    final DateTime? ultimoRespaldo = ref.watch(
+      respaldoProvider.select((s) => s.ultimoRespaldo),
+    );
+    final int diasSinRespaldoEfectivo = ultimoRespaldo != null
+        ? now.difference(ultimoRespaldo).inDays
+        : _diasSinRespaldo;
+
     if (isDemo && ventas.isEmpty && documentos.isEmpty) {
       return InicioUiState(
-        diasSinRespaldo: _diasSinRespaldo,
+        diasSinRespaldo: diasSinRespaldoEfectivo,
         resumenVentas: const ResumenVentasDia(
           total: 1250.00,
           cantidadVentas: 18,
@@ -123,7 +131,7 @@ class InicioNotifier extends Notifier<InicioUiState> {
     }).toList();
 
     return InicioUiState(
-      diasSinRespaldo: _diasSinRespaldo,
+      diasSinRespaldo: diasSinRespaldoEfectivo,
       resumenVentas: resumen,
       documentos: docsRecientes,
       isLocalActivo: true,

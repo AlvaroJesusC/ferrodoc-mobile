@@ -102,7 +102,7 @@ class QuickActionsRow extends StatelessWidget {
                     ),
                     SizedBox(height: shapes.spaceMedium),
                     Text(
-                      'Escanear doc',
+                      'Escanear documento',
                       style: typography.buttonLabel.copyWith(
                         color: colors.onSurface,
                       ),

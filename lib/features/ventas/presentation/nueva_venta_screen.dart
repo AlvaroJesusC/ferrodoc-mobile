@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/catalogo/data/repositories/producto_repository_provider.dart';
 import 'package:ferrodoc_app/features/catalogo/domain/models/producto.dart';
+import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/cobro_screen.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/controllers/carrito_controller.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/historial_ventas_screen.dart';
@@ -25,7 +26,16 @@ final productosVentaProvider =
 /// Permite seleccionar productos del catálogo, añadir productos libres,
 /// gestionar cantidades en el carrito y proceder al cobro (P12).
 class NuevaVentaScreen extends ConsumerStatefulWidget {
-  const NuevaVentaScreen({super.key});
+  const NuevaVentaScreen({
+    this.onVolverAInicio,
+    this.onIrACatalogo,
+    this.isActiveTab = true,
+    super.key,
+  });
+
+  final VoidCallback? onVolverAInicio;
+  final VoidCallback? onIrACatalogo;
+  final bool isActiveTab;
 
   @override
   ConsumerState<NuevaVentaScreen> createState() => _NuevaVentaScreenState();
@@ -59,10 +69,9 @@ class _NuevaVentaScreenState extends ConsumerState<NuevaVentaScreen> {
   }
 
   void _abrirCarritoDetalleSheet() {
-    final carrito = ref.read(carritoNotifierProvider);
     CarritoDetalleSheet.show(
       context,
-      carrito: carrito,
+      onCobrar: _navegarACobro,
       onQuitar: (linea) {
         final tuple =
             ref.read(carritoNotifierProvider.notifier).quitarLinea(linea.id);
@@ -151,12 +160,16 @@ class _NuevaVentaScreenState extends ConsumerState<NuevaVentaScreen> {
     final productosAsync = ref.watch(productosVentaProvider);
 
     return PopScope(
-      canPop: carrito.isEmpty,
+      canPop: !widget.isActiveTab || carrito.isEmpty,
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
+        if (didPop || !widget.isActiveTab || carrito.isEmpty) return;
         final descartar = await _confirmarDescarteVenta();
         if (descartar && context.mounted) {
-          Navigator.of(context).pop();
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            widget.onVolverAInicio?.call();
+          }
         }
       },
       child: Scaffold(
@@ -262,7 +275,7 @@ class _NuevaVentaScreenState extends ConsumerState<NuevaVentaScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Libre'),
+                    label: const Text('Producto libre'),
                   ),
                 ],
               ),
@@ -341,6 +354,31 @@ class _NuevaVentaScreenState extends ConsumerState<NuevaVentaScreen> {
                               style: FilledButton.styleFrom(
                                 backgroundColor: colors.primary,
                                 foregroundColor: colors.onPrimary,
+                              ),
+                            ),
+                            SizedBox(height: shapes.spaceSmall),
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                if (widget.onIrACatalogo != null) {
+                                  widget.onIrACatalogo!();
+                                } else {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (context) =>
+                                          const CatalogoScreen(),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.inventory_2_outlined),
+                              label:
+                                  const Text('Ir al catálogo de productos'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: colors.primary,
+                                side: BorderSide(
+                                  color: colors.primary,
+                                  width: colors.hairlineWidth,
+                                ),
                               ),
                             ),
                           ],

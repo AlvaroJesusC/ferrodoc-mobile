@@ -4,6 +4,7 @@ import 'package:ferrodoc_app/features/documentos/data/repositories/documento_rep
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/hoja_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
+import 'package:ferrodoc_app/features/documentos/presentation/controllers/scanner_controller.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
@@ -184,6 +185,7 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
       );
 
       await repo.guardarDocumento(doc);
+      ref.read(scannerNotifierProvider.notifier).reiniciar();
 
       if (mounted) {
         setState(() {
@@ -248,52 +250,46 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
 
     final canGuardar = _tipoSeleccionado != null && !_isSaving;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        final descartar = await _confirmarDescarte();
-        if (descartar && context.mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: colors.scaffoldBackground,
-        appBar: AppBar(
-          title: Text(
-            'Guardar documento',
-            style: typography.titleSection.copyWith(
-              color: colors.onSurface,
-              fontWeight: FontWeight.w800,
-            ),
+    return Scaffold(
+      backgroundColor: colors.scaffoldBackground,
+      appBar: AppBar(
+        title: Text(
+          'Guardar documento',
+          style: typography.titleSection.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w800,
           ),
-          backgroundColor: colors.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: colors.onSurface),
+        ),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colors.onSurface),
+          tooltip: 'Volver al escáner',
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+        actions: [
+          TextButton(
             onPressed: () async {
               final descartar = await _confirmarDescarte();
               if (descartar && context.mounted) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                final descartar = await _confirmarDescarte();
-                if (descartar && context.mounted) {
+                ref.read(scannerNotifierProvider.notifier).reiniciar();
+                if (Navigator.of(context).canPop()) {
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 }
-              },
-              child: Text(
-                'Descartar',
-                style: TextStyle(color: colors.error, fontWeight: FontWeight.w700),
-              ),
+              }
+            },
+            child: Text(
+              'Descartar',
+              style: TextStyle(color: colors.error, fontWeight: FontWeight.w700),
             ),
-          ],
-        ),
-        body: SingleChildScrollView(
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
           padding: EdgeInsetsDirectional.all(shapes.spaceBase),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -583,7 +579,6 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

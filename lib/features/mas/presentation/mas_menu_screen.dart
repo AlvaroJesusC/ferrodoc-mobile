@@ -123,7 +123,6 @@ class MasMenuScreen extends StatelessWidget {
               icono: Icons.lock_outline_rounded,
               titulo: 'Seguridad',
               subtitulo: 'Bloqueo por PIN y biometría',
-              badgeText: 'P21',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (context) => const SeguridadScreen(),
@@ -137,7 +136,6 @@ class MasMenuScreen extends StatelessWidget {
               icono: Icons.backup_outlined,
               titulo: 'Respaldo',
               subtitulo: 'Exportación y restauración de datos',
-              badgeText: 'P22',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (context) => const RespaldoScreen(),
@@ -151,7 +149,6 @@ class MasMenuScreen extends StatelessWidget {
               icono: Icons.storefront_outlined,
               titulo: 'Configuración del negocio',
               subtitulo: 'Datos de Ferretería AYM y comprobante',
-              badgeText: 'P23',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (context) => const ConfiguracionNegocioScreen(),

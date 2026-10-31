@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/descuento_venta.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/controllers/carrito_controller.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/controllers/cobro_controller.dart';
@@ -92,6 +93,9 @@ class _CobroScreenState extends ConsumerState<CobroScreen> {
 
     final cobroState = ref.watch(cobroNotifierProvider);
     final notifier = ref.read(cobroNotifierProvider.notifier);
+    final metodosConfigurados = ref.watch(
+      configuracionProvider.select((c) => c.metodosPago),
+    );
 
     // Sincronizar el controller si cambió externamente por un atajo de billetes
     if (cobroState.montoRecibidoText != _montoRecibidoController.text) {
@@ -149,8 +153,8 @@ class _CobroScreenState extends ConsumerState<CobroScreen> {
                         icon: const Icon(Icons.discount_outlined, size: 16),
                         label: Text(
                           cobroState.descuento != null
-                              ? 'Editar desc.'
-                              : '+ Descuento',
+                              ? 'Editar descuento'
+                              : 'Agregar descuento',
                         ),
                         style: TextButton.styleFrom(
                           foregroundColor: colors.primary,
@@ -203,7 +207,10 @@ class _CobroScreenState extends ConsumerState<CobroScreen> {
             SizedBox(height: shapes.spaceSmall),
             MetodoPagoSelector(
               selected: cobroState.metodoPago,
+              selectedPersonalizado: cobroState.metodoPagoPersonalizado,
+              metodosConfigurados: metodosConfigurados,
               onSelected: notifier.seleccionarMetodo,
+              onSelectedPersonalizado: notifier.seleccionarMetodoPersonalizado,
             ),
 
             SizedBox(height: shapes.spaceBase),
@@ -259,6 +266,7 @@ class _CobroScreenState extends ConsumerState<CobroScreen> {
               // Visualizador de vuelto o falta
               VueltoDisplay(
                 isEfectivo: cobroState.metodoPago.esEfectivo,
+                tieneMontoIngresado: cobroState.tieneMontoIngresado,
                 isMontoSuficiente: cobroState.isMontoSuficiente,
                 vuelto: cobroState.vuelto,
                 falta: cobroState.falta,

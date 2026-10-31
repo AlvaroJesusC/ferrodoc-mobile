@@ -14,6 +14,7 @@ class CobroState {
   const CobroState({
     required this.subtotal,
     this.metodoPago = MetodoPago.efectivo,
+    this.metodoPagoPersonalizado,
     this.montoRecibidoText = '',
     this.descuento,
     this.cliente = const ClienteVenta(),
@@ -23,6 +24,7 @@ class CobroState {
 
   final double subtotal;
   final MetodoPago metodoPago;
+  final String? metodoPagoPersonalizado;
   final String montoRecibidoText;
   final DescuentoVenta? descuento;
   final ClienteVenta cliente;
@@ -47,6 +49,9 @@ class CobroState {
         .trim();
     return double.tryParse(cleaned);
   }
+
+  /// Indica si el usuario ya ingresó algún monto en el campo de efectivo.
+  bool get tieneMontoIngresado => montoRecibido != null;
 
   /// Indica si el monto entregado en efectivo cubre el total.
   bool get isMontoSuficiente {
@@ -92,6 +97,7 @@ class CobroState {
   CobroState copyWith({
     double? subtotal,
     MetodoPago? metodoPago,
+    String? Function()? metodoPagoPersonalizado,
     String? montoRecibidoText,
     DescuentoVenta? Function()? descuento,
     ClienteVenta? cliente,
@@ -101,6 +107,9 @@ class CobroState {
     return CobroState(
       subtotal: subtotal ?? this.subtotal,
       metodoPago: metodoPago ?? this.metodoPago,
+      metodoPagoPersonalizado: metodoPagoPersonalizado != null
+          ? metodoPagoPersonalizado()
+          : this.metodoPagoPersonalizado,
       montoRecibidoText: montoRecibidoText ?? this.montoRecibidoText,
       descuento: descuento != null ? descuento() : this.descuento,
       cliente: cliente ?? this.cliente,
@@ -116,6 +125,7 @@ class CobroState {
           runtimeType == other.runtimeType &&
           subtotal == other.subtotal &&
           metodoPago == other.metodoPago &&
+          metodoPagoPersonalizado == other.metodoPagoPersonalizado &&
           montoRecibidoText == other.montoRecibidoText &&
           descuento == other.descuento &&
           cliente == other.cliente &&
@@ -126,6 +136,7 @@ class CobroState {
   int get hashCode => Object.hash(
         subtotal,
         metodoPago,
+        metodoPagoPersonalizado,
         montoRecibidoText,
         descuento,
         cliente,
@@ -145,6 +156,15 @@ class CobroNotifier extends Notifier<CobroState> {
   void seleccionarMetodo(MetodoPago metodo) {
     state = state.copyWith(
       metodoPago: metodo,
+      metodoPagoPersonalizado: () => null,
+      errorMessage: () => null,
+    );
+  }
+
+  void seleccionarMetodoPersonalizado(String nombre) {
+    state = state.copyWith(
+      metodoPago: MetodoPago.transferencia,
+      metodoPagoPersonalizado: () => nombre,
       errorMessage: () => null,
     );
   }

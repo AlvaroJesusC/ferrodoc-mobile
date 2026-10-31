@@ -188,6 +188,59 @@ class _ComprobantePreviewScreenState
                           _DashedDivider(color: colors.hairline),
                           SizedBox(height: shapes.spaceBase),
 
+                          // Sello destacado si la venta está anulada (FIX-04)
+                          if (widget.venta.anulada) ...[
+                            Container(
+                              padding: EdgeInsetsDirectional.all(
+                                shapes.spaceMedium,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.errorContainer
+                                    .withValues(alpha: 0.35),
+                                borderRadius: shapes.cardBorderRadius,
+                                border: Border.all(
+                                  color: colors.error,
+                                  width: colors.hairlineWidth,
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.cancel_outlined,
+                                        color: colors.error,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: shapes.spaceSmall),
+                                      Text(
+                                        'VENTA ANULADA',
+                                        style: typography.bodyMedium.copyWith(
+                                          color: colors.error,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (widget.venta.motivoAnulacion != null &&
+                                      widget.venta.motivoAnulacion!
+                                          .isNotEmpty) ...[
+                                    SizedBox(height: shapes.spaceXSmall),
+                                    Text(
+                                      'Motivo: ${widget.venta.motivoAnulacion}',
+                                      style: typography.labelSubtle.copyWith(
+                                        color: colors.onSurfaceMuted,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: shapes.spaceBase),
+                          ],
+
                           // Información del Comprobante
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -402,6 +455,19 @@ class _ComprobantePreviewScreenState
                           ),
                         ),
                       ),
+                    ),
+
+                    SizedBox(height: shapes.spaceSmall),
+
+                    // Botón Terciario: Listo / Volver (FIX-12)
+                    TextButton.icon(
+                      onPressed: () {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      label: const Text('Listo / Volver'),
                     ),
                   ],
                 ),

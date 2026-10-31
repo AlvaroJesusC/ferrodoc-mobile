@@ -10,6 +10,7 @@ class VueltoDisplay extends StatelessWidget {
     required this.isMontoSuficiente,
     required this.vuelto,
     required this.falta,
+    this.tieneMontoIngresado = true,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class VueltoDisplay extends StatelessWidget {
   final bool isMontoSuficiente;
   final double vuelto;
   final double falta;
+  final bool tieneMontoIngresado;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,39 @@ class VueltoDisplay extends StatelessWidget {
     final colors = AppColors.of(context);
     final typography = AppTypography.of(context);
     final shapes = AppShapes.of(context);
+
+    if (!tieneMontoIngresado) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsetsDirectional.all(shapes.spaceBase),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: shapes.cardBorderRadius,
+          border: Border.all(
+            color: colors.hairline,
+            width: colors.hairlineWidth,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.payments_outlined,
+              color: colors.onSurfaceMuted,
+              size: 22,
+            ),
+            SizedBox(width: shapes.spaceBase),
+            Expanded(
+              child: Text(
+                'Ingresa el monto recibido o toca un billete rápido',
+                style: typography.bodyMedium.copyWith(
+                  color: colors.onSurfaceMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (isMontoSuficiente) {
       return Container(

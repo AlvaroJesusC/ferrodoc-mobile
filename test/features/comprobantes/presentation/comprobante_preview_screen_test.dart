@@ -237,5 +237,72 @@ void main() {
       final ventaActualizada = await ventaRepo.getVentaById(venta.id);
       expect(ventaActualizada?.compartido, isTrue);
     });
+
+    testWidgets('FIX-04: muestra sello VENTA ANULADA y motivo cuando la venta está anulada', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final ventaAnulada = _crearVenta().copyWith(
+        anulada: true,
+        motivoAnulacion: () => 'Devolución de mercadería',
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          ventaRepositoryProvider.overrideWithValue(ventaRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        _buildComprobanteApp(container: container, venta: ventaAnulada),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('VENTA ANULADA'), findsOneWidget);
+      expect(find.text('Motivo: Devolución de mercadería'), findsOneWidget);
+    });
+
+    testWidgets(
+      'FIX-12: muestra botón "Listo / Volver" en P16 y opciones "Cambiar número", "Enviar como PDF" y "Enviar como Imagen" en P17',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        final venta = _crearVenta();
+        await ventaRepo.registrarVenta(venta);
+
+        final container = ProviderContainer(
+          overrides: [
+            ventaRepositoryProvider.overrideWithValue(ventaRepo),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(
+          _buildComprobanteApp(container: container, venta: venta),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Listo / Volver'), findsOneWidget);
+
+        await tester.tap(find.text('Enviar por WhatsApp'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cambiar número'), findsOneWidget);
+        expect(find.text('Enviar como PDF'), findsOneWidget);
+        expect(find.text('Enviar como Imagen'), findsOneWidget);
+
+        // Tocar "Cambiar número" despliega el campo de teléfono editable
+        await tester.tap(find.text('Cambiar número'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Número del cliente'), findsOneWidget);
+      },
+    );
   });
 }

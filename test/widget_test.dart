@@ -25,7 +25,7 @@ void main() {
 
       // 3. Verificación de accesos rápidos
       expect(find.text('Nueva venta'), findsOneWidget);
-      expect(find.text('Escanear doc'), findsOneWidget);
+      expect(find.text('Escanear documento'), findsOneWidget);
     },
   );
 }

@@ -95,8 +95,18 @@ void main() {
 
         expect(find.text('S/ 50.00'), findsOneWidget);
 
-        // Ingresamos 60.00 en efectivo contado -> Sobra S/ 10.00
+        // FIX-13: El campo de efectivo contado inicia vacío (sin pre-rellenar el esperado)
         final inputFinder = find.byType(TextFormField);
+        final textFormField = tester.widget<TextFormField>(inputFinder);
+        expect(textFormField.controller?.text, isEmpty);
+
+        // Al tocar el chip "Coincide con esperado", se rellena con 50.00 y cuadra la caja
+        await tester.tap(find.text('Coincide con esperado'));
+        await tester.pumpAndSettle();
+        expect(textFormField.controller?.text, '50.00');
+        expect(find.text('Caja cuadrada'), findsOneWidget);
+
+        // Ingresamos 60.00 en efectivo contado -> Sobra S/ 10.00
         await tester.enterText(inputFinder, '60.00');
         await tester.pumpAndSettle();
         expect(find.text('Sobra S/ 10.00'), findsOneWidget);

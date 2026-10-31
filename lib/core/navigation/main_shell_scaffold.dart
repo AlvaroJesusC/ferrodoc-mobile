@@ -6,6 +6,7 @@ import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
 import 'package:ferrodoc_app/features/mas/presentation/mas_menu_screen.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
+import 'package:ferrodoc_app/features/ventas/presentation/controllers/carrito_controller.dart';
 import 'package:ferrodoc_app/features/ventas/presentation/nueva_venta_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 
@@ -38,6 +39,9 @@ class _MainShellScaffoldState extends ConsumerState<MainShellScaffold> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final seguridad = ref.watch(seguridadProvider);
+    final carritoIsEmpty = ref.watch(
+      carritoNotifierProvider.select((c) => c.isEmpty),
+    );
 
     if (seguridad.bloqueoActivo && !seguridad.estaAutenticado) {
       return BloqueoScreen(
@@ -49,57 +53,77 @@ class _MainShellScaffoldState extends ConsumerState<MainShellScaffold> {
     final tabs = [
       InicioScreen(onNavigateToTab: _onTabSelected),
       const ListaDocumentosScreen(),
-      const NuevaVentaScreen(),
+      NuevaVentaScreen(
+        isActiveTab: _currentIndex == 2,
+        onVolverAInicio: () => _onTabSelected(0),
+        onIrACatalogo: () => _onTabSelected(3),
+      ),
       const CatalogoScreen(),
       const MasMenuScreen(),
     ];
 
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: tabs),
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          border: Border(
-            top: BorderSide(
-              color: colors.hairline,
-              width: colors.hairlineWidth,
+    return PopScope(
+      canPop: _currentIndex == 0 && carritoIsEmpty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_currentIndex == 2 && !carritoIsEmpty) {
+          // NuevaVentaScreen's PopScope handles the confirmation dialog
+          // and invokes onVolverAInicio if confirmed.
+          return;
+        }
+        if (_currentIndex != 0) {
+          _onTabSelected(0);
+        } else if (!carritoIsEmpty) {
+          _onTabSelected(2);
+        }
+      },
+      child: Scaffold(
+        body: IndexedStack(index: _currentIndex, children: tabs),
+        bottomNavigationBar: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.surface,
+            border: Border(
+              top: BorderSide(
+                color: colors.hairline,
+                width: colors.hairlineWidth,
+              ),
             ),
           ),
-        ),
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: _onTabSelected,
-          backgroundColor: colors.surface,
-          indicatorColor: colors.primaryContainer,
-          elevation: 0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home, color: colors.primary),
-              label: 'Inicio',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.description_outlined),
-              selectedIcon: Icon(Icons.description, color: colors.primary),
-              label: 'Documentos',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.point_of_sale_outlined),
-              selectedIcon: Icon(Icons.point_of_sale, color: colors.primary),
-              label: 'Ventas',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.inventory_2_outlined),
-              selectedIcon: Icon(Icons.inventory_2, color: colors.primary),
-              label: 'Catálogo',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.more_horiz_outlined),
-              selectedIcon: Icon(Icons.more_horiz, color: colors.primary),
-              label: 'Más',
-            ),
-          ],
+          child: NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: _onTabSelected,
+            backgroundColor: colors.surface,
+            indicatorColor: colors.primaryContainer,
+            elevation: 0,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home, color: colors.primary),
+                label: 'Inicio',
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.description_outlined),
+                selectedIcon: Icon(Icons.description, color: colors.primary),
+                label: 'Documentos',
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.point_of_sale_outlined),
+                selectedIcon: Icon(Icons.point_of_sale, color: colors.primary),
+                label: 'Ventas',
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.inventory_2_outlined),
+                selectedIcon: Icon(Icons.inventory_2, color: colors.primary),
+                label: 'Catálogo',
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.more_horiz_outlined),
+                selectedIcon: Icon(Icons.more_horiz, color: colors.primary),
+                label: 'Más',
+              ),
+            ],
+          ),
         ),
       ),
     );

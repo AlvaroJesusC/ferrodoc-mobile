@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ferrodoc_app/features/catalogo/domain/models/producto.dart';
+import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
+import 'package:ferrodoc_app/features/configuracion/domain/models/configuracion_negocio.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository.dart';
 import 'package:ferrodoc_app/features/ventas/data/repositories/venta_repository_provider.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/linea_venta.dart';
@@ -68,6 +70,14 @@ void main() {
       expect(find.text('Cobro'), findsOneWidget);
       expect(find.text('Total a cobrar'), findsOneWidget);
       expect(find.text('S/ 35.00'), findsOneWidget);
+      expect(find.text('Agregar descuento'), findsOneWidget);
+
+      // FIX-09: Al iniciar con campo vacío muestra guía neutra en lugar de alerta roja Falta
+      expect(
+        find.text('Ingresa el monto recibido o toca un billete rápido'),
+        findsOneWidget,
+      );
+      expect(find.text('Falta S/ 35.00'), findsNothing);
 
       // Métodos de pago
       expect(find.text('Efectivo'), findsOneWidget);
@@ -94,6 +104,35 @@ void main() {
       // Ahora el botón debe estar habilitado
       button = tester.widget(confirmarFinder);
       expect(button.onPressed, isNotNull);
+    });
+
+    testWidgets(
+        'FIX-05: refleja métodos de pago personalizados agregados en Configuración (P23)',
+        (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          ventaRepositoryProvider.overrideWithValue(ventaRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(configuracionProvider.notifier).actualizarConfiguracion(
+            const ConfiguracionNegocio(
+              metodosPago: ['Efectivo', 'Yape', 'Crédito Directo'],
+            ),
+          );
+      container.read(carritoNotifierProvider.notifier).agregarProducto(
+            _prod('p1', 'Pintura', 35.0),
+          );
+
+      await tester.pumpWidget(_createCobroApp(container: container));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Efectivo'), findsOneWidget);
+      expect(find.text('Yape/Plin'), findsOneWidget);
+      expect(find.text('Crédito Directo'), findsOneWidget);
+      // Tarjeta fue quitada en la configuración
+      expect(find.text('Tarjeta'), findsNothing);
     });
   });
 

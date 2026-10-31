@@ -24,6 +24,8 @@ class DetalleVentaScreen extends ConsumerStatefulWidget {
 
 class _DetalleVentaScreenState extends ConsumerState<DetalleVentaScreen> {
   Future<void> _abrirDialogoAnulacion(Venta venta) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final motivoConfirmado = await showDialog<String?>(
       context: context,
       builder: (context) => _DialogoAnulacion(venta: venta),
@@ -34,11 +36,14 @@ class _DetalleVentaScreenState extends ConsumerState<DetalleVentaScreen> {
       await repo.anularVenta(venta.id, motivoConfirmado);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Venta anulada'),
           ),
         );
+        if (navigator.canPop()) {
+          navigator.pop();
+        }
       }
     }
   }

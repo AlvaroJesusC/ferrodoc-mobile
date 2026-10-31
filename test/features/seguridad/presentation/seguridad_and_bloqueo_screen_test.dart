@@ -101,9 +101,44 @@ void main() {
       expect(find.text('Los PIN no coinciden, inténtalo de nuevo'), findsOneWidget);
       expect(container.read(seguridadProvider).bloqueoActivo, isFalse);
     });
+
+    testWidgets(
+      'FIX-14: valida longitud mínima de PIN mostrando error si tiene menos de 4 dígitos',
+      (tester) async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(_createSeguridadApp(container: container));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byType(SwitchListTile));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Entendido'));
+        await tester.pumpAndSettle();
+
+        // Intentar continuar con solo 2 dígitos
+        await tester.enterText(find.byType(TextField), '12');
+        await tester.tap(find.text('Continuar'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ingresa entre 4 y 6 dígitos'), findsOneWidget);
+        expect(find.text('Crea tu PIN'), findsOneWidget);
+      },
+    );
   });
 
   group('P24 — BloqueoScreen Widget Tests', () {
+    testWidgets('FIX-14: incluye PopScope con canPop false para impedir evasión', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(_createBloqueoApp(container: container));
+      await tester.pumpAndSettle();
+
+      final popScope = tester.widget<PopScope>(find.byType(PopScope));
+      expect(popScope.canPop, isFalse);
+    });
     testWidgets('PIN correcto desbloquea la pantalla', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);

@@ -103,7 +103,7 @@ class CierreCajaNotifier extends Notifier<CierreCajaState> {
 
     final yaGuardado = cierreExistente != null;
     final efectivoContado =
-        yaGuardado ? cierreExistente.efectivoContado : efectivoEsperado;
+        yaGuardado ? cierreExistente.efectivoContado : 0.0;
     final diferencia = efectivoContado - efectivoEsperado;
     final estado = CierreCaja.calcularEstado(diferencia);
 

@@ -62,7 +62,7 @@ class BackupWarningCard extends StatelessWidget {
                 ),
                 SizedBox(height: shapes.spaceXSmall * 0.5),
                 Text(
-                  'Protege tus inventarios y ventas',
+                  'Protege tus documentos y ventas',
                   style: typography.labelSubtle.copyWith(
                     color: colors.backupText.withValues(alpha: 0.85),
                   ),

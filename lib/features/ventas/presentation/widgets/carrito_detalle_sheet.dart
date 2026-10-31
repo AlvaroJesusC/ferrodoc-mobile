@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/carrito_state.dart';
 import 'package:ferrodoc_app/features/ventas/domain/models/linea_venta.dart';
+import 'package:ferrodoc_app/features/ventas/presentation/controllers/carrito_controller.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
 
 /// Hoja inferior modal con el desglose detallado de las líneas del carrito (P11).
-class CarritoDetalleSheet extends StatelessWidget {
+class CarritoDetalleSheet extends ConsumerWidget {
   const CarritoDetalleSheet({
-    required this.carrito,
     required this.onIncrementar,
     required this.onDecrementar,
     required this.onQuitar,
     required this.onVaciar,
+    this.onCobrar,
+    this.carrito,
     super.key,
   });
 
-  final CarritoState carrito;
+  final CarritoState? carrito;
   final ValueChanged<String> onIncrementar;
   final ValueChanged<String> onDecrementar;
   final ValueChanged<LineaVenta> onQuitar;
   final VoidCallback onVaciar;
+  final VoidCallback? onCobrar;
 
   static Future<void> show(
     BuildContext context, {
-    required CarritoState carrito,
+    CarritoState? carrito,
     required ValueChanged<String> onIncrementar,
     required ValueChanged<String> onDecrementar,
     required ValueChanged<LineaVenta> onQuitar,
     required VoidCallback onVaciar,
+    VoidCallback? onCobrar,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -40,15 +45,19 @@ class CarritoDetalleSheet extends StatelessWidget {
         onDecrementar: onDecrementar,
         onQuitar: onQuitar,
         onVaciar: onVaciar,
+        onCobrar: onCobrar,
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
     final shapes = AppShapes.of(context);
     final typography = AppTypography.of(context);
+
+    final liveCarrito = ref.watch(carritoNotifierProvider);
+    final activeCarrito = carrito ?? liveCarrito;
 
     return Container(
       decoration: BoxDecoration(
@@ -93,7 +102,7 @@ class CarritoDetalleSheet extends StatelessWidget {
                       color: colors.onSurface,
                     ),
                   ),
-                  if (carrito.isNotEmpty)
+                  if (activeCarrito.isNotEmpty)
                     TextButton(
                       onPressed: onVaciar,
                       child: Text(
@@ -110,7 +119,7 @@ class CarritoDetalleSheet extends StatelessWidget {
             Divider(color: colors.hairline, height: shapes.spaceLarge),
 
             // Lista de líneas del carrito
-            if (carrito.isEmpty)
+            if (activeCarrito.isEmpty)
               Padding(
                 padding: EdgeInsetsDirectional.all(shapes.spaceXXLarge),
                 child: Center(
@@ -129,16 +138,30 @@ class CarritoDetalleSheet extends StatelessWidget {
                   padding: EdgeInsetsDirectional.symmetric(
                     horizontal: shapes.spaceBase,
                   ),
-                  itemCount: carrito.lineas.length,
+                  itemCount: activeCarrito.lineas.length,
                   separatorBuilder: (_, index) =>
                       Divider(color: colors.hairline, height: shapes.spaceMedium),
                   itemBuilder: (context, index) {
-                    final linea = carrito.lineas[index];
+                    final linea = activeCarrito.lineas[index];
                     return _LineaItemRow(
                       linea: linea,
                       onIncrementar: () => onIncrementar(linea.id),
-                      onDecrementar: () => onDecrementar(linea.id),
-                      onQuitar: () => onQuitar(linea),
+                      onDecrementar: () {
+                        onDecrementar(linea.id);
+                        if (carrito == null &&
+                            ref.read(carritoNotifierProvider).isEmpty &&
+                            context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      onQuitar: () {
+                        onQuitar(linea);
+                        if (carrito == null &&
+                            ref.read(carritoNotifierProvider).isEmpty &&
+                            context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                     );
                   },
                 ),
@@ -146,7 +169,7 @@ class CarritoDetalleSheet extends StatelessWidget {
 
             SizedBox(height: shapes.spaceMedium),
 
-            // Resumen de total y botón de cerrar
+            // Resumen de total y botón de cobro
             Padding(
               padding:
                   EdgeInsetsDirectional.symmetric(horizontal: shapes.spaceBase),
@@ -161,7 +184,7 @@ class CarritoDetalleSheet extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    carrito.subtotalFormateado,
+                    activeCarrito.subtotalFormateado,
                     style: typography.titleSection.copyWith(
                       color: colors.primary,
                       fontWeight: FontWeight.w800,
@@ -170,6 +193,39 @@ class CarritoDetalleSheet extends StatelessWidget {
                 ],
               ),
             ),
+
+            if (activeCarrito.isNotEmpty && onCobrar != null) ...[
+              SizedBox(height: shapes.spaceBase),
+              Padding(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: shapes.spaceBase,
+                ),
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      onCobrar!();
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: shapes.cardBorderRadius,
+                      ),
+                    ),
+                    child: Text(
+                      'Cobrar ${activeCarrito.subtotalFormateado}',
+                      style: typography.buttonLabel.copyWith(
+                        color: colors.onPrimary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -4,12 +4,14 @@ import 'package:ferrodoc_app/features/configuracion/presentation/configuracion_n
 import 'package:ferrodoc_app/features/documentos/presentation/escaner_documentos_screen.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/visor_documento_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/controllers/inicio_controller.dart';
+import 'package:ferrodoc_app/features/inicio/presentation/widgets/backup_warning_card.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/inicio_app_bar.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/quick_actions_row.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/terminal_header_card.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ultimos_documentos_section.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/ventas_resumen_card.dart';
 import 'package:ferrodoc_app/features/reportes/presentation/reporte_ventas_screen.dart';
+import 'package:ferrodoc_app/features/respaldo/presentation/respaldo_screen.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 
 /// Pantalla principal P02 — Inicio de ferrodoc_app.
@@ -44,7 +46,32 @@ class InicioScreen extends ConsumerWidget {
     return Scaffold(
       appBar: InicioAppBar(
         isDemoActive: state.isDemoMode,
-        onToggleDemoTap: notifier.toggleDemoMode,
+        onToggleDemoTap: () async {
+          if (!state.isDemoMode &&
+              (state.resumenVentas.hasVentas || state.documentos.isNotEmpty)) {
+            final confirmar = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('¿Activar Modo Demo?'),
+                content: const Text(
+                  'Se reemplazarán los datos actuales por datos de demostración de Ferretería AYM.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: const Text('Activar Demo'),
+                  ),
+                ],
+              ),
+            );
+            if (confirmar != true) return;
+          }
+          notifier.toggleDemoMode();
+        },
         onSettingsTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (context) => const ConfiguracionNegocioScreen(),
@@ -63,6 +90,18 @@ class InicioScreen extends ConsumerWidget {
                 fechaTexto: state.fechaHoyTexto,
                 isLocalActivo: state.isLocalActivo,
               ),
+
+              if (state.shouldShowBackupWarning) ...[
+                SizedBox(height: shapes.spaceLarge),
+                BackupWarningCard(
+                  diasSinRespaldo: state.diasSinRespaldo,
+                  onRespaldar: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (context) => const RespaldoScreen(),
+                    ),
+                  ),
+                ),
+              ],
 
               SizedBox(height: shapes.spaceLarge),
 
