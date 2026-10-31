@@ -1,0 +1,19 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'productos_dao.dart';
+
+// ignore_for_file: type=lint
+mixin _$ProductosDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ProductosTableTable get productosTable => attachedDatabase.productosTable;
+  ProductosDaoManager get managers => ProductosDaoManager(this);
+}
+
+class ProductosDaoManager {
+  final _$ProductosDaoMixin _db;
+  ProductosDaoManager(this._db);
+  $$ProductosTableTableTableManager get productosTable =>
+      $$ProductosTableTableTableManager(
+        _db.attachedDatabase,
+        _db.productosTable,
+      );
+}
