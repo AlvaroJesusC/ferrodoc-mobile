@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ferrodoc_app/core/navigation/main_shell_scaffold.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/splash_screen.dart';
+import 'package:ferrodoc_app/features/inicio/presentation/widgets/splash_logo.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
 import 'package:ferrodoc_app/theme/app_theme.dart';
@@ -44,6 +45,21 @@ void main() {
       expect(find.text('Sistema Móvil de Gestión y Ventas'), findsOneWidget);
       expect(find.text('Local activo'), findsOneWidget);
       expect(find.text('Ferrodoc v1.0.0 · 100% Sin conexión'), findsOneWidget);
+
+      // Verifica que todos los elementos principales estén centrados horizontalmente en la pantalla
+      final screenCenterDx = tester.getCenter(find.byType(Scaffold)).dx;
+      expect(
+        tester.getCenter(find.byType(SplashLogo)).dx,
+        closeTo(screenCenterDx, 1.0),
+      );
+      expect(
+        tester.getCenter(find.text('Ferretería AYM')).dx,
+        closeTo(screenCenterDx, 1.0),
+      );
+      expect(
+        tester.getCenter(find.text('Ferrodoc v1.0.0 · 100% Sin conexión')).dx,
+        closeTo(screenCenterDx, 1.0),
+      );
     });
 
     testWidgets('muestra mensaje oficial de error y botón Reintentar si falla la carga local', (tester) async {

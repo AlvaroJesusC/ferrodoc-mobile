@@ -24,25 +24,9 @@ class SplashLogo extends StatelessWidget {
 
     return Semantics(
       label: 'Logotipo de Ferretería AYM',
-      child: Container(
+      child: SizedBox(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: shapes.cardBorderRadius,
-          border: Border.all(
-            color: colors.hairline,
-            width: colors.hairlineWidth,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.primary.withValues(alpha: 0.12),
-              blurRadius: shapes.spaceLarge,
-              offset: Offset(0, shapes.spaceXSmall),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
         child: Image.asset(
           assetPath,
           fit: BoxFit.contain,
@@ -50,6 +34,18 @@ class SplashLogo extends StatelessWidget {
             // Insignia fallback vectorial cuando la imagen física aún no ha sido agregada
             return DecoratedBox(
               decoration: BoxDecoration(
+                borderRadius: shapes.cardBorderRadius,
+                border: Border.all(
+                  color: colors.hairline,
+                  width: colors.hairlineWidth,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.primary.withValues(alpha: 0.12),
+                    blurRadius: shapes.spaceLarge,
+                    offset: Offset(0, shapes.spaceXSmall),
+                  ),
+                ],
                 gradient: LinearGradient(
                   begin: AlignmentDirectional.topStart,
                   end: AlignmentDirectional.bottomEnd,

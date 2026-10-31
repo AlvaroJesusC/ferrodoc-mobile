@@ -129,151 +129,157 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     return Scaffold(
       backgroundColor: colors.scaffoldBackground,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsetsDirectional.all(shapes.spaceLarge),
-          child: Column(
-            children: [
-              const Spacer(flex: 3),
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: EdgeInsetsDirectional.all(shapes.spaceLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Spacer(flex: 3),
 
-              // Logotipo de la Ferretería AYM (con fallback visual si aún no está la imagen)
-              const SplashLogo(size: 112.0),
+                // Logotipo de la Ferretería AYM (con fallback visual si aún no está la imagen)
+                const SplashLogo(size: 120.0),
 
-              SizedBox(height: shapes.spaceLarge),
+                SizedBox(height: shapes.spaceLarge),
 
-              // Nombre de la marca
-              Text(
-                'Ferretería AYM',
-                style: typography.titleHeader.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-
-              SizedBox(height: shapes.spaceXSmall),
-
-              // Subtítulo del sistema
-              Text(
-                'Sistema Móvil de Gestión y Ventas',
-                style: typography.bodyRegular.copyWith(
-                  color: colors.onSurfaceMuted,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              SizedBox(height: shapes.spaceMedium),
-
-              // Badge de Local activo (F17: 100% offline)
-              Container(
-                padding: EdgeInsetsDirectional.symmetric(
-                  horizontal: shapes.spaceMedium,
-                  vertical: shapes.spaceXSmall,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.successContainer,
-                  borderRadius: shapes.pillBorderRadius,
-                  border: Border.all(
-                    color: colors.hairline,
-                    width: colors.hairlineWidth,
+                // Nombre de la marca
+                Text(
+                  'Ferretería AYM',
+                  style: typography.titleHeader.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: shapes.spaceSmall,
-                      height: shapes.spaceSmall,
-                      decoration: BoxDecoration(
-                        color: colors.success,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: shapes.spaceSmall),
-                    Text(
-                      'Local activo',
-                      style: typography.badgeLabel.copyWith(
-                        color: colors.onSuccessContainer,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+
+                SizedBox(height: shapes.spaceXSmall),
+
+                // Subtítulo del sistema
+                Text(
+                  'Sistema Móvil de Gestión y Ventas',
+                  style: typography.bodyRegular.copyWith(
+                    color: colors.onSurfaceMuted,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
 
-              const Spacer(flex: 2),
+                SizedBox(height: shapes.spaceMedium),
 
-              // Zona interactiva: Estado de carga o Estado de Error con Reintentar
-              if (_hasError) ...[
+                // Badge de Local activo (F17: 100% offline)
                 Container(
-                  padding: EdgeInsetsDirectional.all(shapes.spaceBase),
+                  padding: EdgeInsetsDirectional.symmetric(
+                    horizontal: shapes.spaceMedium,
+                    vertical: shapes.spaceXSmall,
+                  ),
                   decoration: BoxDecoration(
-                    color: colors.errorContainer,
-                    borderRadius: shapes.cardBorderRadius,
+                    color: colors.successContainer,
+                    borderRadius: shapes.pillBorderRadius,
                     border: Border.all(
-                      color: colors.error.withValues(alpha: 0.3),
+                      color: colors.hairline,
                       width: colors.hairlineWidth,
                     ),
                   ),
-                  child: Column(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.cloud_off_outlined,
-                        size: shapes.spaceXXLarge,
-                        color: colors.error,
+                      Container(
+                        width: shapes.spaceSmall,
+                        height: shapes.spaceSmall,
+                        decoration: BoxDecoration(
+                          color: colors.success,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                      SizedBox(height: shapes.spaceSmall),
+                      SizedBox(width: shapes.spaceSmall),
                       Text(
-                        'No se pudieron abrir tus datos',
-                        style: typography.titleCard.copyWith(
-                          color: colors.onErrorContainer,
+                        'Local activo',
+                        style: typography.badgeLabel.copyWith(
+                          color: colors.onSuccessContainer,
                           fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: shapes.spaceMedium),
-                      FilledButton.icon(
-                        onPressed: _iniciarCarga,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: colors.error,
-                          foregroundColor: colors.onPrimary,
-                          padding: EdgeInsetsDirectional.symmetric(
-                            horizontal: shapes.spaceLarge,
-                            vertical: shapes.spaceMedium,
-                          ),
-                          shape: shapes.pillShape(),
-                        ),
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text(
-                          'Reintentar',
-                          style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ] else if (_isLoading) ...[
-                SizedBox(
-                  width: shapes.spaceLarge,
-                  height: shapes.spaceLarge,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+
+                const Spacer(flex: 2),
+
+                // Zona interactiva: Estado de carga o Estado de Error con Reintentar
+                if (_hasError) ...[
+                  Container(
+                    padding: EdgeInsetsDirectional.all(shapes.spaceBase),
+                    decoration: BoxDecoration(
+                      color: colors.errorContainer,
+                      borderRadius: shapes.cardBorderRadius,
+                      border: Border.all(
+                        color: colors.error.withValues(alpha: 0.3),
+                        width: colors.hairlineWidth,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_off_outlined,
+                          size: shapes.spaceXXLarge,
+                          color: colors.error,
+                        ),
+                        SizedBox(height: shapes.spaceSmall),
+                        Text(
+                          'No se pudieron abrir tus datos',
+                          style: typography.titleCard.copyWith(
+                            color: colors.onErrorContainer,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: shapes.spaceMedium),
+                        FilledButton.icon(
+                          onPressed: _iniciarCarga,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.error,
+                            foregroundColor: colors.onPrimary,
+                            padding: EdgeInsetsDirectional.symmetric(
+                              horizontal: shapes.spaceLarge,
+                              vertical: shapes.spaceMedium,
+                            ),
+                            shape: shapes.pillShape(),
+                          ),
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text(
+                            'Reintentar',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ] else if (_isLoading) ...[
+                  SizedBox(
+                    width: shapes.spaceLarge,
+                    height: shapes.spaceLarge,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                    ),
+                  ),
+                ],
+
+                const Spacer(flex: 2),
+
+                // Pie informativo de funcionamiento offline
+                Text(
+                  'Ferrodoc v1.0.0 · 100% Sin conexión',
+                  style: typography.labelSubtle.copyWith(
+                    color: colors.onSurfaceMuted,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
+                SizedBox(height: shapes.spaceSmall),
               ],
-
-              const Spacer(flex: 2),
-
-              // Pie informativo de funcionamiento offline
-              Text(
-                'Ferrodoc v1.0.0 · 100% Sin conexión',
-                style: typography.labelSubtle.copyWith(
-                  color: colors.onSurfaceMuted,
-                ),
-              ),
-              SizedBox(height: shapes.spaceSmall),
-            ],
+            ),
           ),
         ),
       ),
