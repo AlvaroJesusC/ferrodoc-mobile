@@ -1,6 +1,8 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/hoja_documento.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/camera_service.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/controllers/scanner_controller.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/guardar_documento_screen.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/widgets/scanner_overlay_cropper.dart';
@@ -19,6 +21,14 @@ class EscanerDocumentosScreen extends ConsumerStatefulWidget {
 
 class _EscanerDocumentosScreenState
     extends ConsumerState<EscanerDocumentosScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(scannerNotifierProvider.notifier).inicializarCamara();
+    });
+  }
+
   Future<bool> _confirmarDescarte() async {
     final state = ref.read(scannerNotifierProvider);
     final tieneHojas =
@@ -267,15 +277,23 @@ class _EscanerDocumentosScreenState
   }
 }
 
-class _CameraViewfinder extends StatelessWidget {
+class _CameraViewfinder extends ConsumerWidget {
   const _CameraViewfinder({required this.numeroHoja});
 
   final int numeroHoja;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cameraService = ref.watch(cameraServiceProvider);
+    final hasLiveCamera = cameraService.isAvailable &&
+        cameraService.isInitialized &&
+        cameraService.controller != null &&
+        cameraService.controller!.value.isInitialized;
+
     return AspectRatio(
-      aspectRatio: 3 / 4,
+      aspectRatio: hasLiveCamera
+          ? cameraService.controller!.value.aspectRatio
+          : 3 / 4,
       child: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -283,37 +301,44 @@ class _CameraViewfinder extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.white24, width: 2),
         ),
+        clipBehavior: Clip.antiAlias,
         child: Stack(
           alignment: Alignment.center,
+          fit: StackFit.expand,
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.crop_free,
-                  size: 72,
-                  color: Colors.white38,
+            if (hasLiveCamera)
+              CameraPreview(cameraService.controller!)
+            else
+              Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.crop_free,
+                      size: 72,
+                      color: Colors.white38,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Apunta al documento dentro del recuadro',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'El recorte se ajustará automáticamente',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Apunta al documento dentro del recuadro',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'El recorte se ajustará automáticamente',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
+              ),
           ],
         ),
       ),

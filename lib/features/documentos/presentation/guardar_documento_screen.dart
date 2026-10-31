@@ -4,6 +4,7 @@ import 'package:ferrodoc_app/features/documentos/data/repositories/documento_rep
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/hoja_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/document_storage_service.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/controllers/scanner_controller.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -159,16 +160,30 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
       }
 
       final repo = ref.read(documentoRepositoryProvider);
+      final storageService = ref.read(documentStorageServiceProvider);
       final ahora = DateTime.now();
       final monto = double.tryParse(_montoController.text.trim());
+      final docId = 'doc_${ahora.millisecondsSinceEpoch}';
+
+      // Persiste cada hoja capturada físicamente en el directorio documentos_aym/
+      final hojasPersistidas = <HojaDocumento>[];
+      for (int i = 0; i < widget.hojas.length; i++) {
+        final hoja = widget.hojas[i];
+        final rutaPersistida = await storageService.persistirHoja(
+          documentoId: docId,
+          hojaIndex: i,
+          rutaOrigen: hoja.ruta,
+        );
+        hojasPersistidas.add(hoja.copyWith(ruta: rutaPersistida));
+      }
 
       final doc = Documento(
-        id: 'doc_${ahora.millisecondsSinceEpoch}',
+        id: docId,
         titulo: _tituloController.text.trim().isNotEmpty
             ? _tituloController.text.trim()
             : _generarTituloAutomatico(_tipoSeleccionado!, _fechaComprobante),
         tipo: _tipoSeleccionado!,
-        hojas: widget.hojas,
+        hojas: hojasPersistidas,
         proveedor: _proveedorController.text.trim().isNotEmpty
             ? _proveedorController.text.trim()
             : null,

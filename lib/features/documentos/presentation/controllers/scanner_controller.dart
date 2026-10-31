@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/hoja_documento.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/camera_service.dart';
 
 /// Estado inmutable del flujo de captura y escaneo de cámara (P05).
 @immutable
@@ -14,6 +15,7 @@ class ScannerState {
     this.isReviewingCrop = false,
     this.rotacionActual = 0,
     this.hojaEnEdicionRuta,
+    this.isCameraInitialized = false,
   });
 
   final bool hasPermission;
@@ -24,6 +26,7 @@ class ScannerState {
   final bool isReviewingCrop;
   final int rotacionActual;
   final String? hojaEnEdicionRuta;
+  final bool isCameraInitialized;
 
   int get numeroHojas => hojasCapturadas.length;
 
@@ -37,6 +40,7 @@ class ScannerState {
     int? rotacionActual,
     String? hojaEnEdicionRuta,
     bool clearHojaEnEdicion = false,
+    bool? isCameraInitialized,
   }) {
     return ScannerState(
       hasPermission: hasPermission ?? this.hasPermission,
@@ -49,6 +53,7 @@ class ScannerState {
       hojaEnEdicionRuta: clearHojaEnEdicion
           ? null
           : (hojaEnEdicionRuta ?? this.hojaEnEdicionRuta),
+      isCameraInitialized: isCameraInitialized ?? this.isCameraInitialized,
     );
   }
 }
@@ -60,8 +65,16 @@ class ScannerNotifier extends Notifier<ScannerState> {
     return const ScannerState();
   }
 
+  Future<void> inicializarCamara() async {
+    final cameraService = ref.read(cameraServiceProvider);
+    final ok = await cameraService.initialize();
+    state = state.copyWith(isCameraInitialized: ok);
+  }
+
   void toggleFlash() {
-    state = state.copyWith(flashActive: !state.flashActive);
+    final nuevoEstado = !state.flashActive;
+    state = state.copyWith(flashActive: nuevoEstado);
+    ref.read(cameraServiceProvider).toggleTorch(nuevoEstado);
   }
 
   void setLowLight(bool isLowLight) {
@@ -77,12 +90,35 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
   /// Dispara la captura fotográfica y pasa a la vista de recorte y ajuste.
   void capturarFoto([String? path]) {
-    final ruta = path ?? 'scan_temp_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    state = state.copyWith(
-      isReviewingCrop: true,
-      hojaEnEdicionRuta: ruta,
-      rotacionActual: 0,
-    );
+    if (path != null) {
+      state = state.copyWith(
+        isReviewingCrop: true,
+        hojaEnEdicionRuta: path,
+        rotacionActual: 0,
+      );
+      return;
+    }
+
+    final cameraService = ref.read(cameraServiceProvider);
+    if (cameraService.isInitialized) {
+      cameraService.takePicture().then((result) {
+        final ruta = result is CameraCaptureSuccess
+            ? result.path
+            : 'scan_temp_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        state = state.copyWith(
+          isReviewingCrop: true,
+          hojaEnEdicionRuta: ruta,
+          rotacionActual: 0,
+        );
+      });
+    } else {
+      state = state.copyWith(
+        isReviewingCrop: true,
+        hojaEnEdicionRuta:
+            'scan_temp_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        rotacionActual: 0,
+      );
+    }
   }
 
   /// Rota la imagen capturada en incrementos de 90°.
@@ -126,6 +162,7 @@ class ScannerNotifier extends Notifier<ScannerState> {
 
   /// Reinicia el escáner al estado inicial.
   void reiniciar() {
+    ref.read(cameraServiceProvider).toggleTorch(false);
     state = const ScannerState();
   }
 }

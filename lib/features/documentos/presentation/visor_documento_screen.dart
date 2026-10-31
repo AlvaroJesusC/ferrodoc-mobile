@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/document_storage_service.dart';
 import 'package:ferrodoc_app/features/documentos/domain/services/documento_share_service.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -76,6 +77,10 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
     );
 
     if (confirmar == true && mounted) {
+      final storageService = ref.read(documentStorageServiceProvider);
+      for (final hoja in doc.hojas) {
+        await storageService.eliminarArchivoFisico(hoja.ruta);
+      }
       final repo = ref.read(documentoRepositoryProvider);
       await repo.eliminarDocumento(doc.id);
 
