@@ -290,10 +290,19 @@ class _CameraViewfinder extends ConsumerWidget {
         cameraService.controller != null &&
         cameraService.controller!.value.isInitialized;
 
+    // En dispositivos móviles (Android/iOS), el hardware reporta el sensor en orientación
+    // apaisada (width > height, ratio > 1.0). En modo vertical (portrait), la proporción
+    // visual de encuadre es 1 / rawRatio (típicamente 9/16 o 3/4).
+    final double portraitRatio;
+    if (hasLiveCamera) {
+      final raw = cameraService.controller!.value.aspectRatio;
+      portraitRatio = raw > 1.0 ? (1.0 / raw) : raw;
+    } else {
+      portraitRatio = 3 / 4;
+    }
+
     return AspectRatio(
-      aspectRatio: hasLiveCamera
-          ? cameraService.controller!.value.aspectRatio
-          : 3 / 4,
+      aspectRatio: portraitRatio,
       child: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -306,9 +315,35 @@ class _CameraViewfinder extends ConsumerWidget {
           alignment: Alignment.center,
           fit: StackFit.expand,
           children: [
-            if (hasLiveCamera)
-              CameraPreview(cameraService.controller!)
-            else
+            if (hasLiveCamera) ...[
+              CameraPreview(cameraService.controller!),
+              const _ScannerFramingOverlay(),
+              Positioned(
+                top: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.65),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.document_scanner, size: 16, color: Colors.white),
+                      SizedBox(width: 6),
+                      Text(
+                        'Apunta al documento dentro del recuadro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -341,6 +376,94 @@ class _CameraViewfinder extends ConsumerWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ScannerFramingOverlay extends StatelessWidget {
+  const _ScannerFramingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return const IgnorePointer(
+      child: Padding(
+        padding: EdgeInsets.all(24.0),
+        child: Stack(
+          children: [
+            // Esquina superior izquierda ┌
+            Align(
+              alignment: Alignment.topLeft,
+              child: _CornerBracket(isTop: true, isLeft: true),
+            ),
+            // Esquina superior derecha ┐
+            Align(
+              alignment: Alignment.topRight,
+              child: _CornerBracket(isTop: true, isLeft: false),
+            ),
+            // Esquina inferior izquierda └
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: _CornerBracket(isTop: false, isLeft: true),
+            ),
+            // Esquina inferior derecha ┘
+            Align(
+              alignment: Alignment.bottomRight,
+              child: _CornerBracket(isTop: false, isLeft: false),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CornerBracket extends StatelessWidget {
+  const _CornerBracket({required this.isTop, required this.isLeft});
+
+  final bool isTop;
+  final bool isLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    const length = 28.0;
+    const thickness = 3.5;
+    const color = Color(0xFFF97316); // Naranja primario de Ferretería AYM
+
+    return SizedBox(
+      width: length,
+      height: length,
+      child: Stack(
+        children: [
+          Positioned(
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            child: Container(
+              width: length,
+              height: thickness,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Positioned(
+            top: isTop ? 0 : null,
+            bottom: isTop ? null : 0,
+            left: isLeft ? 0 : null,
+            right: isLeft ? null : 0,
+            child: Container(
+              width: thickness,
+              height: length,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

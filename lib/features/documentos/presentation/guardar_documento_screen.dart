@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
@@ -5,6 +6,7 @@ import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/hoja_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/services/document_storage_service.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/documento_pdf_service.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/controllers/scanner_controller.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -200,6 +202,15 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
       );
 
       await repo.guardarDocumento(doc);
+
+      // Compilar y guardar físicamente el PDF multipágina en disco
+      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+        final pdfService = ref.read(documentoPdfServiceProvider);
+        try {
+          await pdfService.generarYGuardarPdf(doc);
+        } catch (_) {}
+      }
+
       ref.read(scannerNotifierProvider.notifier).reiniciar();
 
       if (mounted) {
@@ -240,15 +251,37 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
               title: const Text('Vista previa', style: TextStyle(color: Colors.white)),
             ),
             body: Center(
-              child: InteractiveViewer(
-                child: Container(
-                  width: 320,
-                  height: 440,
-                  color: Colors.white,
-                  child: const Center(
-                    child: Icon(Icons.document_scanner, size: 80, color: Colors.black54),
-                  ),
-                ),
+              child: PageView.builder(
+                itemCount: widget.hojas.length,
+                itemBuilder: (context, index) {
+                  final hoja = widget.hojas[index];
+                  final file = File(hoja.ruta);
+                  final existe = file.existsSync();
+
+                  return InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 5.0,
+                    child: Center(
+                      child: existe
+                          ? RotatedBox(
+                              quarterTurns: hoja.rotacionGrados ~/ 90,
+                              child: Image.file(file, fit: BoxFit.contain),
+                            )
+                          : Container(
+                              width: 320,
+                              height: 440,
+                              color: Colors.white,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.document_scanner,
+                                  size: 80,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -363,27 +396,65 @@ class _GuardarDocumentoScreenState extends ConsumerState<GuardarDocumentoScreen>
                         ),
                       ],
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.image_outlined, size: 40, color: colors.onSurfaceMuted),
-                            SizedBox(height: shapes.spaceSmall),
-                            Text(
-                              '${widget.hojas.length} ${widget.hojas.length == 1 ? "hoja" : "hojas"}',
-                              style: typography.labelSubtle.copyWith(
-                                color: colors.onSurfaceMuted,
-                                fontWeight: FontWeight.w600,
+                        if (widget.hojas.isNotEmpty &&
+                            File(widget.hojas.first.ruta).existsSync())
+                          RotatedBox(
+                            quarterTurns:
+                                widget.hojas.first.rotacionGrados ~/ 90,
+                            child: Image.file(
+                              File(widget.hojas.first.ruta),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          )
+                        else
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.image_outlined,
+                                  size: 40, color: colors.onSurfaceMuted),
+                              SizedBox(height: shapes.spaceSmall),
+                              Text(
+                                '${widget.hojas.length} ${widget.hojas.length == 1 ? "hoja" : "hojas"}',
+                                style: typography.labelSubtle.copyWith(
+                                  color: colors.onSurfaceMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (widget.hojas.isNotEmpty &&
+                            File(widget.hojas.first.ruta).existsSync())
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${widget.hojas.length} ${widget.hojas.length == 1 ? "hoja" : "hojas"}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
                         Positioned(
                           bottom: 8,
                           right: 8,
-                          child: Icon(Icons.zoom_in, size: 20, color: colors.primary),
+                          child: Icon(Icons.zoom_in,
+                              size: 20, color: colors.primary),
                         ),
                       ],
                     ),

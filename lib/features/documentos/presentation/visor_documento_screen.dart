@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/services/document_storage_service.dart';
+import 'package:ferrodoc_app/features/documentos/domain/services/documento_pdf_service.dart';
 import 'package:ferrodoc_app/features/documentos/domain/services/documento_share_service.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
@@ -276,6 +279,24 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
     await shareService.compartirDocumento(doc);
   }
 
+  Future<void> _abrirOpcionesPdf(Documento doc) async {
+    try {
+      final pdfService = ref.read(documentoPdfServiceProvider);
+      await Printing.layoutPdf(
+        onLayout: (format) async => await pdfService.generarPdfBytes(doc),
+        name: '${doc.titulo}.pdf',
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo abrir el visor de impresión'),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
@@ -366,6 +387,8 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
 
         final totalHojas = doc.hojas.isNotEmpty ? doc.hojas.length : 1;
 
+        final currentDoc = doc;
+
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(
@@ -376,7 +399,7 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  doc.titulo,
+                  currentDoc.titulo,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -396,16 +419,21 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
               ],
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                tooltip: 'Ver / Imprimir PDF',
+                onPressed: () => _abrirOpcionesPdf(currentDoc),
+              ),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: Colors.white),
                 onSelected: (value) {
                   switch (value) {
                     case 'editar':
-                      _abrirDialogoEditar(doc!);
+                      _abrirDialogoEditar(currentDoc);
                     case 'compartir':
-                      _compartir(doc!);
+                      _compartir(currentDoc);
                     case 'eliminar':
-                      _abrirDialogoEliminar(doc!);
+                      _abrirDialogoEliminar(currentDoc);
                   }
                 },
                 itemBuilder: (context) => [
@@ -454,53 +482,38 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
+                  final hoja = doc!.hojas.isNotEmpty && index < doc.hojas.length
+                      ? doc.hojas[index]
+                      : null;
+                  final file = hoja != null ? File(hoja.ruta) : null;
+                  final tieneImagenReal = file != null && file.existsSync();
+
+                  if (tieneImagenReal) {
+                    return InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 5.0,
+                      child: Center(
+                        child: RotatedBox(
+                          quarterTurns: hoja!.rotacionGrados ~/ 90,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.file(
+                              file,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildFallbackCard(currentDoc, index, totalHojas),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
                   return InteractiveViewer(
                     minScale: 1.0,
                     maxScale: 4.0,
                     child: Center(
-                      child: Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black45,
-                              blurRadius: 16,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              doc!.tipo.icono,
-                              size: 72,
-                              color: const Color(0xFF1E293B),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              doc.titulo,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFF0F172A),
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Página ${index + 1} de $totalHojas',
-                              style: const TextStyle(
-                                color: Color(0xFF64748B),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _buildFallbackCard(currentDoc, index, totalHojas),
                     ),
                   );
                 },
@@ -609,6 +622,52 @@ class _VisorDocumentoScreenState extends ConsumerState<VisorDocumentoScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildFallbackCard(Documento doc, int index, int totalHojas) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            doc.tipo.icono,
+            size: 72,
+            color: const Color(0xFF1E293B),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            doc.titulo,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF0F172A),
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Página ${index + 1} de $totalHojas',
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
