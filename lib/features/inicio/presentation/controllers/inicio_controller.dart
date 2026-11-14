@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/core/demo/demo_mode_provider.dart';
+import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/documentos/data/repositories/documento_repository_provider.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/documento.dart';
 import 'package:ferrodoc_app/features/documentos/domain/models/tipo_documento.dart';
@@ -34,6 +35,9 @@ class InicioNotifier extends Notifier<InicioUiState> {
         ref.watch(watchDocumentosProvider);
     final List<Documento> documentos = docsAsync.value ?? const [];
 
+    final nombreNegocio = ref.watch(
+      configuracionProvider.select((c) => c.nombre),
+    );
     final DateTime? ultimoRespaldo = ref.watch(
       respaldoProvider.select((s) => s.ultimoRespaldo),
     );
@@ -73,7 +77,7 @@ class InicioNotifier extends Notifier<InicioUiState> {
         ],
         isLocalActivo: true,
         fechaHoyTexto: fechaHoyTexto,
-        nombreNegocio: 'Ferretería AYM',
+        nombreNegocio: nombreNegocio,
         isDemoMode: true,
       );
     }
@@ -136,7 +140,7 @@ class InicioNotifier extends Notifier<InicioUiState> {
       documentos: docsRecientes,
       isLocalActivo: true,
       fechaHoyTexto: fechaHoyTexto,
-      nombreNegocio: 'Ferretería AYM',
+      nombreNegocio: nombreNegocio,
       isDemoMode: isDemo,
     );
   }

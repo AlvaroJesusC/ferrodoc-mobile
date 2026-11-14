@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/core/time/clock_provider.dart';
+import 'package:ferrodoc_app/data/repositories/drift_preferencias_repository.dart';
 import 'package:ferrodoc_app/features/catalogo/data/repositories/producto_repository_provider.dart';
 import 'package:ferrodoc_app/features/cierre_caja/data/cierre_caja_repository_provider.dart';
 import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
@@ -72,10 +76,46 @@ class RespaldoUiState {
 /// Notifier que gestiona la creación y restauración de respaldos (P22).
 class RespaldoNotifier extends Notifier<RespaldoUiState> {
   bool _cancelado = false;
+  int _revision = 0;
+  bool _cargado = false;
+  Future<void>? _loadFuture;
+  Future<void> _pendingSave = Future<void>.value();
 
   @override
   RespaldoUiState build() {
+    _cancelado = false;
+    _revision = 0;
+    _cargado = false;
+    _loadFuture = null;
+    _pendingSave = Future<void>.value();
+    Future<void>.microtask(() {
+      if (ref.mounted) {
+        unawaited(cargar().catchError((_) {}));
+      }
+    });
     return const RespaldoUiState();
+  }
+
+  /// Carga la fecha del último respaldo exitoso persistida en SQLite.
+  Future<void> cargar() {
+    if (_cargado || _revision > 0 || !ref.mounted) {
+      return Future<void>.value();
+    }
+    return _loadFuture ??= _ejecutarCarga();
+  }
+
+  Future<void> _ejecutarCarga() async {
+    final revInicial = _revision;
+    try {
+      final repo = ref.read(driftPreferenciasRepositoryProvider);
+      final prefs = await repo.getPreferencias();
+      if (!ref.mounted || _revision != revInicial || _cargado) return;
+      _cargado = true;
+      state = state.copyWith(ultimoRespaldo: () => prefs.ultimoRespaldo);
+    } catch (_) {
+      _loadFuture = null;
+      rethrow;
+    }
   }
 
   void cancelarProceso() {
@@ -111,7 +151,8 @@ class RespaldoNotifier extends Notifier<RespaldoUiState> {
       final jsonRespaldo = await service.exportarDatosCifrados(password, config);
       if (_cancelado) return false;
 
-      final now = DateTime.now();
+      final now = ref.read(appClockProvider)();
+      _revision++;
       state = state.copyWith(
         estaProcesando: false,
         progreso: 1.0,
@@ -119,6 +160,7 @@ class RespaldoNotifier extends Notifier<RespaldoUiState> {
         ultimoArchivoGenerado: () => jsonRespaldo,
         respaldoListo: true,
       );
+      _persistirUltimoRespaldo(now);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -130,6 +172,23 @@ class RespaldoNotifier extends Notifier<RespaldoUiState> {
       return false;
     }
   }
+
+  void _persistirUltimoRespaldo(DateTime fecha) {
+    final repo = ref.read(driftPreferenciasRepositoryProvider);
+    _pendingSave = _pendingSave
+        .then((_) async {
+          if (!ref.mounted) return;
+          await repo.saveUltimoRespaldo(fecha);
+        })
+        .catchError((Object e) {
+          if (ref.mounted) {
+            debugPrint('Error guardando fecha de último respaldo: $e');
+          }
+        });
+  }
+
+  /// Espera a que finalice cualquier escritura pendiente en SQLite.
+  Future<void> esperarGuardado() => _pendingSave;
 
   Future<bool> restaurarRespaldo(String password, String contenido) async {
     _cancelado = false;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/core/demo/widgets/demo_mode_card.dart';
+import 'package:ferrodoc_app/features/actualizacion/presentation/widgets/actualizacion_card.dart';
 import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/configuracion/domain/models/configuracion_negocio.dart';
 import 'package:ferrodoc_app/features/configuracion/presentation/widgets/comprobante_mini_preview.dart';
@@ -399,6 +400,11 @@ class _ConfiguracionNegocioScreenState
 
                 // Sección Modo Demostración (MVP)
                 const DemoModeCard(),
+
+                SizedBox(height: shapes.spaceLarge),
+
+                // Sección Actualizaciones OTA
+                const ActualizacionCard(),
 
                 SizedBox(height: shapes.spaceXXLarge),
               ],

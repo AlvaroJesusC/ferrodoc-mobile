@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/core/demo/widgets/demo_mode_card.dart';
+import 'package:ferrodoc_app/features/actualizacion/presentation/controllers/actualizacion_controller.dart';
+import 'package:ferrodoc_app/features/actualizacion/presentation/widgets/actualizacion_card.dart';
 import 'package:ferrodoc_app/features/cierre_caja/presentation/cierre_caja_screen.dart';
 import 'package:ferrodoc_app/features/configuracion/presentation/configuracion_negocio_screen.dart';
 import 'package:ferrodoc_app/features/mas/presentation/widgets/mas_menu_item_tile.dart';
@@ -21,14 +24,17 @@ import 'package:ferrodoc_app/theme/widgets/theme_selector_card.dart';
 /// 4. Seguridad (P21)
 /// 5. Respaldo (P22)
 /// 6. Configuración del negocio (P23)
-class MasMenuScreen extends StatelessWidget {
+class MasMenuScreen extends ConsumerWidget {
   const MasMenuScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
     final shapes = AppShapes.of(context);
     final typography = AppTypography.of(context);
+    final versionActual = ref.watch(
+      actualizacionNotifierProvider.select((s) => s.versionActual),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -179,6 +185,10 @@ class MasMenuScreen extends StatelessWidget {
 
             const DemoModeCard(),
 
+            SizedBox(height: shapes.spaceMedium),
+
+            const ActualizacionCard(),
+
             SizedBox(height: shapes.spaceXXLarge),
 
             // Pie: Versión de la app
@@ -186,7 +196,7 @@ class MasMenuScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Ferrodoc v1.0.0 (Local)',
+                    'Ferrodoc v$versionActual (Local)',
                     style: typography.labelSubtle.copyWith(
                       color: colors.onSurfaceMuted,
                       fontWeight: FontWeight.w600,

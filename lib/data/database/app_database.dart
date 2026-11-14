@@ -6,11 +6,13 @@ import 'package:ferrodoc_app/data/database/tables/ventas_table.dart';
 import 'package:ferrodoc_app/data/database/tables/documentos_table.dart';
 import 'package:ferrodoc_app/data/database/tables/configuracion_table.dart';
 import 'package:ferrodoc_app/data/database/tables/cierre_caja_table.dart';
+import 'package:ferrodoc_app/data/database/tables/preferencias_table.dart';
 import 'package:ferrodoc_app/data/database/daos/productos_dao.dart';
 import 'package:ferrodoc_app/data/database/daos/ventas_dao.dart';
 import 'package:ferrodoc_app/data/database/daos/documentos_dao.dart';
 import 'package:ferrodoc_app/data/database/daos/configuracion_dao.dart';
 import 'package:ferrodoc_app/data/database/daos/cierre_caja_dao.dart';
+import 'package:ferrodoc_app/data/database/daos/preferencias_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -26,6 +28,7 @@ part 'app_database.g.dart';
     HojasDocumentoTable,
     ConfiguracionNegocioTable,
     CierresCajaTable,
+    PreferenciasAppTable,
   ],
   daos: [
     ProductosDao,
@@ -33,6 +36,7 @@ part 'app_database.g.dart';
     DocumentosDao,
     ConfiguracionDao,
     CierreCajaDao,
+    PreferenciasDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -43,10 +47,15 @@ class AppDatabase extends _$AppDatabase {
       : super(executor ?? openMemoryConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(preferenciasAppTable);
+          }
+        },
         beforeOpen: (details) async {
           // Activar pragmas de SQLite en cada conexión abierta
           await customStatement('PRAGMA foreign_keys = ON;');

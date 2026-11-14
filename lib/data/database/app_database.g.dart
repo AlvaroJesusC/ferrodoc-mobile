@@ -4067,6 +4067,653 @@ class CierresCajaTableCompanion extends UpdateCompanion<CierreCajaRow> {
   }
 }
 
+class $PreferenciasAppTableTable extends PreferenciasAppTable
+    with TableInfo<$PreferenciasAppTableTable, PreferenciasAppRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PreferenciasAppTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _themeModeMeta = const VerificationMeta(
+    'themeMode',
+  );
+  @override
+  late final GeneratedColumn<String> themeMode = GeneratedColumn<String>(
+    'theme_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('system'),
+  );
+  static const VerificationMeta _seguridadBloqueoActivoMeta =
+      const VerificationMeta('seguridadBloqueoActivo');
+  @override
+  late final GeneratedColumn<bool> seguridadBloqueoActivo =
+      GeneratedColumn<bool>(
+        'seguridad_bloqueo_activo',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("seguridad_bloqueo_activo" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _seguridadPinMeta = const VerificationMeta(
+    'seguridadPin',
+  );
+  @override
+  late final GeneratedColumn<String> seguridadPin = GeneratedColumn<String>(
+    'seguridad_pin',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seguridadUsarHuellaMeta =
+      const VerificationMeta('seguridadUsarHuella');
+  @override
+  late final GeneratedColumn<bool> seguridadUsarHuella = GeneratedColumn<bool>(
+    'seguridad_usar_huella',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("seguridad_usar_huella" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _seguridadTiempoBloqueoMeta =
+      const VerificationMeta('seguridadTiempoBloqueo');
+  @override
+  late final GeneratedColumn<String> seguridadTiempoBloqueo =
+      GeneratedColumn<String>(
+        'seguridad_tiempo_bloqueo',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('inmediato'),
+      );
+  static const VerificationMeta _seguridadIntentosFallidosMeta =
+      const VerificationMeta('seguridadIntentosFallidos');
+  @override
+  late final GeneratedColumn<int> seguridadIntentosFallidos =
+      GeneratedColumn<int>(
+        'seguridad_intentos_fallidos',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _seguridadBloqueadoHastaMsMeta =
+      const VerificationMeta('seguridadBloqueadoHastaMs');
+  @override
+  late final GeneratedColumn<int> seguridadBloqueadoHastaMs =
+      GeneratedColumn<int>(
+        'seguridad_bloqueado_hasta_ms',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _ultimoRespaldoMsMeta = const VerificationMeta(
+    'ultimoRespaldoMs',
+  );
+  @override
+  late final GeneratedColumn<int> ultimoRespaldoMs = GeneratedColumn<int>(
+    'ultimo_respaldo_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    themeMode,
+    seguridadBloqueoActivo,
+    seguridadPin,
+    seguridadUsarHuella,
+    seguridadTiempoBloqueo,
+    seguridadIntentosFallidos,
+    seguridadBloqueadoHastaMs,
+    ultimoRespaldoMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'preferencias_app_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PreferenciasAppRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('theme_mode')) {
+      context.handle(
+        _themeModeMeta,
+        themeMode.isAcceptableOrUnknown(data['theme_mode']!, _themeModeMeta),
+      );
+    }
+    if (data.containsKey('seguridad_bloqueo_activo')) {
+      context.handle(
+        _seguridadBloqueoActivoMeta,
+        seguridadBloqueoActivo.isAcceptableOrUnknown(
+          data['seguridad_bloqueo_activo']!,
+          _seguridadBloqueoActivoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguridad_pin')) {
+      context.handle(
+        _seguridadPinMeta,
+        seguridadPin.isAcceptableOrUnknown(
+          data['seguridad_pin']!,
+          _seguridadPinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguridad_usar_huella')) {
+      context.handle(
+        _seguridadUsarHuellaMeta,
+        seguridadUsarHuella.isAcceptableOrUnknown(
+          data['seguridad_usar_huella']!,
+          _seguridadUsarHuellaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguridad_tiempo_bloqueo')) {
+      context.handle(
+        _seguridadTiempoBloqueoMeta,
+        seguridadTiempoBloqueo.isAcceptableOrUnknown(
+          data['seguridad_tiempo_bloqueo']!,
+          _seguridadTiempoBloqueoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguridad_intentos_fallidos')) {
+      context.handle(
+        _seguridadIntentosFallidosMeta,
+        seguridadIntentosFallidos.isAcceptableOrUnknown(
+          data['seguridad_intentos_fallidos']!,
+          _seguridadIntentosFallidosMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seguridad_bloqueado_hasta_ms')) {
+      context.handle(
+        _seguridadBloqueadoHastaMsMeta,
+        seguridadBloqueadoHastaMs.isAcceptableOrUnknown(
+          data['seguridad_bloqueado_hasta_ms']!,
+          _seguridadBloqueadoHastaMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('ultimo_respaldo_ms')) {
+      context.handle(
+        _ultimoRespaldoMsMeta,
+        ultimoRespaldoMs.isAcceptableOrUnknown(
+          data['ultimo_respaldo_ms']!,
+          _ultimoRespaldoMsMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PreferenciasAppRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PreferenciasAppRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      themeMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}theme_mode'],
+      )!,
+      seguridadBloqueoActivo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}seguridad_bloqueo_activo'],
+      )!,
+      seguridadPin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seguridad_pin'],
+      ),
+      seguridadUsarHuella: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}seguridad_usar_huella'],
+      )!,
+      seguridadTiempoBloqueo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seguridad_tiempo_bloqueo'],
+      )!,
+      seguridadIntentosFallidos: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seguridad_intentos_fallidos'],
+      )!,
+      seguridadBloqueadoHastaMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seguridad_bloqueado_hasta_ms'],
+      ),
+      ultimoRespaldoMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ultimo_respaldo_ms'],
+      ),
+    );
+  }
+
+  @override
+  $PreferenciasAppTableTable createAlias(String alias) {
+    return $PreferenciasAppTableTable(attachedDatabase, alias);
+  }
+}
+
+class PreferenciasAppRow extends DataClass
+    implements Insertable<PreferenciasAppRow> {
+  final int id;
+
+  /// Modo de tema visual (`system`, `light`, `dark`).
+  final String themeMode;
+
+  /// Indica si el bloqueo por PIN está activo (F18).
+  final bool seguridadBloqueoActivo;
+
+  /// PIN configurado por el usuario (nullable si el bloqueo no está activo).
+  final String? seguridadPin;
+
+  /// Indica si el usuario habilitó desbloqueo biométrico por huella.
+  final bool seguridadUsarHuella;
+
+  /// Tiempo de inactividad antes de bloquear (`inmediato`, `unMinuto`, `cincoMinutos`).
+  final String seguridadTiempoBloqueo;
+
+  /// Cantidad acumulada de intentos fallidos de PIN.
+  final int seguridadIntentosFallidos;
+
+  /// Timestamp UTC en milisegundos hasta el cual dura la penalización actual.
+  final int? seguridadBloqueadoHastaMs;
+
+  /// Timestamp UTC en milisegundos de la última creación exitosa de respaldo (F19).
+  final int? ultimoRespaldoMs;
+  const PreferenciasAppRow({
+    required this.id,
+    required this.themeMode,
+    required this.seguridadBloqueoActivo,
+    this.seguridadPin,
+    required this.seguridadUsarHuella,
+    required this.seguridadTiempoBloqueo,
+    required this.seguridadIntentosFallidos,
+    this.seguridadBloqueadoHastaMs,
+    this.ultimoRespaldoMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['theme_mode'] = Variable<String>(themeMode);
+    map['seguridad_bloqueo_activo'] = Variable<bool>(seguridadBloqueoActivo);
+    if (!nullToAbsent || seguridadPin != null) {
+      map['seguridad_pin'] = Variable<String>(seguridadPin);
+    }
+    map['seguridad_usar_huella'] = Variable<bool>(seguridadUsarHuella);
+    map['seguridad_tiempo_bloqueo'] = Variable<String>(seguridadTiempoBloqueo);
+    map['seguridad_intentos_fallidos'] = Variable<int>(
+      seguridadIntentosFallidos,
+    );
+    if (!nullToAbsent || seguridadBloqueadoHastaMs != null) {
+      map['seguridad_bloqueado_hasta_ms'] = Variable<int>(
+        seguridadBloqueadoHastaMs,
+      );
+    }
+    if (!nullToAbsent || ultimoRespaldoMs != null) {
+      map['ultimo_respaldo_ms'] = Variable<int>(ultimoRespaldoMs);
+    }
+    return map;
+  }
+
+  PreferenciasAppTableCompanion toCompanion(bool nullToAbsent) {
+    return PreferenciasAppTableCompanion(
+      id: Value(id),
+      themeMode: Value(themeMode),
+      seguridadBloqueoActivo: Value(seguridadBloqueoActivo),
+      seguridadPin: seguridadPin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seguridadPin),
+      seguridadUsarHuella: Value(seguridadUsarHuella),
+      seguridadTiempoBloqueo: Value(seguridadTiempoBloqueo),
+      seguridadIntentosFallidos: Value(seguridadIntentosFallidos),
+      seguridadBloqueadoHastaMs:
+          seguridadBloqueadoHastaMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seguridadBloqueadoHastaMs),
+      ultimoRespaldoMs: ultimoRespaldoMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ultimoRespaldoMs),
+    );
+  }
+
+  factory PreferenciasAppRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PreferenciasAppRow(
+      id: serializer.fromJson<int>(json['id']),
+      themeMode: serializer.fromJson<String>(json['themeMode']),
+      seguridadBloqueoActivo: serializer.fromJson<bool>(
+        json['seguridadBloqueoActivo'],
+      ),
+      seguridadPin: serializer.fromJson<String?>(json['seguridadPin']),
+      seguridadUsarHuella: serializer.fromJson<bool>(
+        json['seguridadUsarHuella'],
+      ),
+      seguridadTiempoBloqueo: serializer.fromJson<String>(
+        json['seguridadTiempoBloqueo'],
+      ),
+      seguridadIntentosFallidos: serializer.fromJson<int>(
+        json['seguridadIntentosFallidos'],
+      ),
+      seguridadBloqueadoHastaMs: serializer.fromJson<int?>(
+        json['seguridadBloqueadoHastaMs'],
+      ),
+      ultimoRespaldoMs: serializer.fromJson<int?>(json['ultimoRespaldoMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'themeMode': serializer.toJson<String>(themeMode),
+      'seguridadBloqueoActivo': serializer.toJson<bool>(seguridadBloqueoActivo),
+      'seguridadPin': serializer.toJson<String?>(seguridadPin),
+      'seguridadUsarHuella': serializer.toJson<bool>(seguridadUsarHuella),
+      'seguridadTiempoBloqueo': serializer.toJson<String>(
+        seguridadTiempoBloqueo,
+      ),
+      'seguridadIntentosFallidos': serializer.toJson<int>(
+        seguridadIntentosFallidos,
+      ),
+      'seguridadBloqueadoHastaMs': serializer.toJson<int?>(
+        seguridadBloqueadoHastaMs,
+      ),
+      'ultimoRespaldoMs': serializer.toJson<int?>(ultimoRespaldoMs),
+    };
+  }
+
+  PreferenciasAppRow copyWith({
+    int? id,
+    String? themeMode,
+    bool? seguridadBloqueoActivo,
+    Value<String?> seguridadPin = const Value.absent(),
+    bool? seguridadUsarHuella,
+    String? seguridadTiempoBloqueo,
+    int? seguridadIntentosFallidos,
+    Value<int?> seguridadBloqueadoHastaMs = const Value.absent(),
+    Value<int?> ultimoRespaldoMs = const Value.absent(),
+  }) => PreferenciasAppRow(
+    id: id ?? this.id,
+    themeMode: themeMode ?? this.themeMode,
+    seguridadBloqueoActivo:
+        seguridadBloqueoActivo ?? this.seguridadBloqueoActivo,
+    seguridadPin: seguridadPin.present ? seguridadPin.value : this.seguridadPin,
+    seguridadUsarHuella: seguridadUsarHuella ?? this.seguridadUsarHuella,
+    seguridadTiempoBloqueo:
+        seguridadTiempoBloqueo ?? this.seguridadTiempoBloqueo,
+    seguridadIntentosFallidos:
+        seguridadIntentosFallidos ?? this.seguridadIntentosFallidos,
+    seguridadBloqueadoHastaMs: seguridadBloqueadoHastaMs.present
+        ? seguridadBloqueadoHastaMs.value
+        : this.seguridadBloqueadoHastaMs,
+    ultimoRespaldoMs: ultimoRespaldoMs.present
+        ? ultimoRespaldoMs.value
+        : this.ultimoRespaldoMs,
+  );
+  PreferenciasAppRow copyWithCompanion(PreferenciasAppTableCompanion data) {
+    return PreferenciasAppRow(
+      id: data.id.present ? data.id.value : this.id,
+      themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
+      seguridadBloqueoActivo: data.seguridadBloqueoActivo.present
+          ? data.seguridadBloqueoActivo.value
+          : this.seguridadBloqueoActivo,
+      seguridadPin: data.seguridadPin.present
+          ? data.seguridadPin.value
+          : this.seguridadPin,
+      seguridadUsarHuella: data.seguridadUsarHuella.present
+          ? data.seguridadUsarHuella.value
+          : this.seguridadUsarHuella,
+      seguridadTiempoBloqueo: data.seguridadTiempoBloqueo.present
+          ? data.seguridadTiempoBloqueo.value
+          : this.seguridadTiempoBloqueo,
+      seguridadIntentosFallidos: data.seguridadIntentosFallidos.present
+          ? data.seguridadIntentosFallidos.value
+          : this.seguridadIntentosFallidos,
+      seguridadBloqueadoHastaMs: data.seguridadBloqueadoHastaMs.present
+          ? data.seguridadBloqueadoHastaMs.value
+          : this.seguridadBloqueadoHastaMs,
+      ultimoRespaldoMs: data.ultimoRespaldoMs.present
+          ? data.ultimoRespaldoMs.value
+          : this.ultimoRespaldoMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PreferenciasAppRow(')
+          ..write('id: $id, ')
+          ..write('themeMode: $themeMode, ')
+          ..write('seguridadBloqueoActivo: $seguridadBloqueoActivo, ')
+          ..write('seguridadPin: $seguridadPin, ')
+          ..write('seguridadUsarHuella: $seguridadUsarHuella, ')
+          ..write('seguridadTiempoBloqueo: $seguridadTiempoBloqueo, ')
+          ..write('seguridadIntentosFallidos: $seguridadIntentosFallidos, ')
+          ..write('seguridadBloqueadoHastaMs: $seguridadBloqueadoHastaMs, ')
+          ..write('ultimoRespaldoMs: $ultimoRespaldoMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    themeMode,
+    seguridadBloqueoActivo,
+    seguridadPin,
+    seguridadUsarHuella,
+    seguridadTiempoBloqueo,
+    seguridadIntentosFallidos,
+    seguridadBloqueadoHastaMs,
+    ultimoRespaldoMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PreferenciasAppRow &&
+          other.id == this.id &&
+          other.themeMode == this.themeMode &&
+          other.seguridadBloqueoActivo == this.seguridadBloqueoActivo &&
+          other.seguridadPin == this.seguridadPin &&
+          other.seguridadUsarHuella == this.seguridadUsarHuella &&
+          other.seguridadTiempoBloqueo == this.seguridadTiempoBloqueo &&
+          other.seguridadIntentosFallidos == this.seguridadIntentosFallidos &&
+          other.seguridadBloqueadoHastaMs == this.seguridadBloqueadoHastaMs &&
+          other.ultimoRespaldoMs == this.ultimoRespaldoMs);
+}
+
+class PreferenciasAppTableCompanion
+    extends UpdateCompanion<PreferenciasAppRow> {
+  final Value<int> id;
+  final Value<String> themeMode;
+  final Value<bool> seguridadBloqueoActivo;
+  final Value<String?> seguridadPin;
+  final Value<bool> seguridadUsarHuella;
+  final Value<String> seguridadTiempoBloqueo;
+  final Value<int> seguridadIntentosFallidos;
+  final Value<int?> seguridadBloqueadoHastaMs;
+  final Value<int?> ultimoRespaldoMs;
+  const PreferenciasAppTableCompanion({
+    this.id = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.seguridadBloqueoActivo = const Value.absent(),
+    this.seguridadPin = const Value.absent(),
+    this.seguridadUsarHuella = const Value.absent(),
+    this.seguridadTiempoBloqueo = const Value.absent(),
+    this.seguridadIntentosFallidos = const Value.absent(),
+    this.seguridadBloqueadoHastaMs = const Value.absent(),
+    this.ultimoRespaldoMs = const Value.absent(),
+  });
+  PreferenciasAppTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.themeMode = const Value.absent(),
+    this.seguridadBloqueoActivo = const Value.absent(),
+    this.seguridadPin = const Value.absent(),
+    this.seguridadUsarHuella = const Value.absent(),
+    this.seguridadTiempoBloqueo = const Value.absent(),
+    this.seguridadIntentosFallidos = const Value.absent(),
+    this.seguridadBloqueadoHastaMs = const Value.absent(),
+    this.ultimoRespaldoMs = const Value.absent(),
+  });
+  static Insertable<PreferenciasAppRow> custom({
+    Expression<int>? id,
+    Expression<String>? themeMode,
+    Expression<bool>? seguridadBloqueoActivo,
+    Expression<String>? seguridadPin,
+    Expression<bool>? seguridadUsarHuella,
+    Expression<String>? seguridadTiempoBloqueo,
+    Expression<int>? seguridadIntentosFallidos,
+    Expression<int>? seguridadBloqueadoHastaMs,
+    Expression<int>? ultimoRespaldoMs,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (themeMode != null) 'theme_mode': themeMode,
+      if (seguridadBloqueoActivo != null)
+        'seguridad_bloqueo_activo': seguridadBloqueoActivo,
+      if (seguridadPin != null) 'seguridad_pin': seguridadPin,
+      if (seguridadUsarHuella != null)
+        'seguridad_usar_huella': seguridadUsarHuella,
+      if (seguridadTiempoBloqueo != null)
+        'seguridad_tiempo_bloqueo': seguridadTiempoBloqueo,
+      if (seguridadIntentosFallidos != null)
+        'seguridad_intentos_fallidos': seguridadIntentosFallidos,
+      if (seguridadBloqueadoHastaMs != null)
+        'seguridad_bloqueado_hasta_ms': seguridadBloqueadoHastaMs,
+      if (ultimoRespaldoMs != null) 'ultimo_respaldo_ms': ultimoRespaldoMs,
+    });
+  }
+
+  PreferenciasAppTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? themeMode,
+    Value<bool>? seguridadBloqueoActivo,
+    Value<String?>? seguridadPin,
+    Value<bool>? seguridadUsarHuella,
+    Value<String>? seguridadTiempoBloqueo,
+    Value<int>? seguridadIntentosFallidos,
+    Value<int?>? seguridadBloqueadoHastaMs,
+    Value<int?>? ultimoRespaldoMs,
+  }) {
+    return PreferenciasAppTableCompanion(
+      id: id ?? this.id,
+      themeMode: themeMode ?? this.themeMode,
+      seguridadBloqueoActivo:
+          seguridadBloqueoActivo ?? this.seguridadBloqueoActivo,
+      seguridadPin: seguridadPin ?? this.seguridadPin,
+      seguridadUsarHuella: seguridadUsarHuella ?? this.seguridadUsarHuella,
+      seguridadTiempoBloqueo:
+          seguridadTiempoBloqueo ?? this.seguridadTiempoBloqueo,
+      seguridadIntentosFallidos:
+          seguridadIntentosFallidos ?? this.seguridadIntentosFallidos,
+      seguridadBloqueadoHastaMs:
+          seguridadBloqueadoHastaMs ?? this.seguridadBloqueadoHastaMs,
+      ultimoRespaldoMs: ultimoRespaldoMs ?? this.ultimoRespaldoMs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (themeMode.present) {
+      map['theme_mode'] = Variable<String>(themeMode.value);
+    }
+    if (seguridadBloqueoActivo.present) {
+      map['seguridad_bloqueo_activo'] = Variable<bool>(
+        seguridadBloqueoActivo.value,
+      );
+    }
+    if (seguridadPin.present) {
+      map['seguridad_pin'] = Variable<String>(seguridadPin.value);
+    }
+    if (seguridadUsarHuella.present) {
+      map['seguridad_usar_huella'] = Variable<bool>(seguridadUsarHuella.value);
+    }
+    if (seguridadTiempoBloqueo.present) {
+      map['seguridad_tiempo_bloqueo'] = Variable<String>(
+        seguridadTiempoBloqueo.value,
+      );
+    }
+    if (seguridadIntentosFallidos.present) {
+      map['seguridad_intentos_fallidos'] = Variable<int>(
+        seguridadIntentosFallidos.value,
+      );
+    }
+    if (seguridadBloqueadoHastaMs.present) {
+      map['seguridad_bloqueado_hasta_ms'] = Variable<int>(
+        seguridadBloqueadoHastaMs.value,
+      );
+    }
+    if (ultimoRespaldoMs.present) {
+      map['ultimo_respaldo_ms'] = Variable<int>(ultimoRespaldoMs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PreferenciasAppTableCompanion(')
+          ..write('id: $id, ')
+          ..write('themeMode: $themeMode, ')
+          ..write('seguridadBloqueoActivo: $seguridadBloqueoActivo, ')
+          ..write('seguridadPin: $seguridadPin, ')
+          ..write('seguridadUsarHuella: $seguridadUsarHuella, ')
+          ..write('seguridadTiempoBloqueo: $seguridadTiempoBloqueo, ')
+          ..write('seguridadIntentosFallidos: $seguridadIntentosFallidos, ')
+          ..write('seguridadBloqueadoHastaMs: $seguridadBloqueadoHastaMs, ')
+          ..write('ultimoRespaldoMs: $ultimoRespaldoMs')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4085,6 +4732,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CierresCajaTableTable cierresCajaTable = $CierresCajaTableTable(
     this,
   );
+  late final $PreferenciasAppTableTable preferenciasAppTable =
+      $PreferenciasAppTableTable(this);
   late final ProductosDao productosDao = ProductosDao(this as AppDatabase);
   late final VentasDao ventasDao = VentasDao(this as AppDatabase);
   late final DocumentosDao documentosDao = DocumentosDao(this as AppDatabase);
@@ -4092,6 +4741,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this as AppDatabase,
   );
   late final CierreCajaDao cierreCajaDao = CierreCajaDao(this as AppDatabase);
+  late final PreferenciasDao preferenciasDao = PreferenciasDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4104,6 +4756,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     hojasDocumentoTable,
     configuracionNegocioTable,
     cierresCajaTable,
+    preferenciasAppTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6628,6 +7281,306 @@ typedef $$CierresCajaTableTableProcessedTableManager =
       CierreCajaRow,
       PrefetchHooks Function()
     >;
+typedef $$PreferenciasAppTableTableCreateCompanionBuilder =
+    PreferenciasAppTableCompanion Function({
+      Value<int> id,
+      Value<String> themeMode,
+      Value<bool> seguridadBloqueoActivo,
+      Value<String?> seguridadPin,
+      Value<bool> seguridadUsarHuella,
+      Value<String> seguridadTiempoBloqueo,
+      Value<int> seguridadIntentosFallidos,
+      Value<int?> seguridadBloqueadoHastaMs,
+      Value<int?> ultimoRespaldoMs,
+    });
+typedef $$PreferenciasAppTableTableUpdateCompanionBuilder =
+    PreferenciasAppTableCompanion Function({
+      Value<int> id,
+      Value<String> themeMode,
+      Value<bool> seguridadBloqueoActivo,
+      Value<String?> seguridadPin,
+      Value<bool> seguridadUsarHuella,
+      Value<String> seguridadTiempoBloqueo,
+      Value<int> seguridadIntentosFallidos,
+      Value<int?> seguridadBloqueadoHastaMs,
+      Value<int?> ultimoRespaldoMs,
+    });
+
+class $$PreferenciasAppTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PreferenciasAppTableTable> {
+  $$PreferenciasAppTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get seguridadBloqueoActivo => $composableBuilder(
+    column: $table.seguridadBloqueoActivo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seguridadPin => $composableBuilder(
+    column: $table.seguridadPin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get seguridadUsarHuella => $composableBuilder(
+    column: $table.seguridadUsarHuella,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seguridadTiempoBloqueo => $composableBuilder(
+    column: $table.seguridadTiempoBloqueo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seguridadIntentosFallidos => $composableBuilder(
+    column: $table.seguridadIntentosFallidos,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seguridadBloqueadoHastaMs => $composableBuilder(
+    column: $table.seguridadBloqueadoHastaMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ultimoRespaldoMs => $composableBuilder(
+    column: $table.ultimoRespaldoMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PreferenciasAppTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PreferenciasAppTableTable> {
+  $$PreferenciasAppTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get themeMode => $composableBuilder(
+    column: $table.themeMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get seguridadBloqueoActivo => $composableBuilder(
+    column: $table.seguridadBloqueoActivo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seguridadPin => $composableBuilder(
+    column: $table.seguridadPin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get seguridadUsarHuella => $composableBuilder(
+    column: $table.seguridadUsarHuella,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seguridadTiempoBloqueo => $composableBuilder(
+    column: $table.seguridadTiempoBloqueo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seguridadIntentosFallidos => $composableBuilder(
+    column: $table.seguridadIntentosFallidos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seguridadBloqueadoHastaMs => $composableBuilder(
+    column: $table.seguridadBloqueadoHastaMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ultimoRespaldoMs => $composableBuilder(
+    column: $table.ultimoRespaldoMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PreferenciasAppTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PreferenciasAppTableTable> {
+  $$PreferenciasAppTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get themeMode =>
+      $composableBuilder(column: $table.themeMode, builder: (column) => column);
+
+  GeneratedColumn<bool> get seguridadBloqueoActivo => $composableBuilder(
+    column: $table.seguridadBloqueoActivo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seguridadPin => $composableBuilder(
+    column: $table.seguridadPin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get seguridadUsarHuella => $composableBuilder(
+    column: $table.seguridadUsarHuella,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seguridadTiempoBloqueo => $composableBuilder(
+    column: $table.seguridadTiempoBloqueo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get seguridadIntentosFallidos => $composableBuilder(
+    column: $table.seguridadIntentosFallidos,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get seguridadBloqueadoHastaMs => $composableBuilder(
+    column: $table.seguridadBloqueadoHastaMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get ultimoRespaldoMs => $composableBuilder(
+    column: $table.ultimoRespaldoMs,
+    builder: (column) => column,
+  );
+}
+
+class $$PreferenciasAppTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PreferenciasAppTableTable,
+          PreferenciasAppRow,
+          $$PreferenciasAppTableTableFilterComposer,
+          $$PreferenciasAppTableTableOrderingComposer,
+          $$PreferenciasAppTableTableAnnotationComposer,
+          $$PreferenciasAppTableTableCreateCompanionBuilder,
+          $$PreferenciasAppTableTableUpdateCompanionBuilder,
+          (
+            PreferenciasAppRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PreferenciasAppTableTable,
+              PreferenciasAppRow
+            >,
+          ),
+          PreferenciasAppRow,
+          PrefetchHooks Function()
+        > {
+  $$PreferenciasAppTableTableTableManager(
+    _$AppDatabase db,
+    $PreferenciasAppTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PreferenciasAppTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PreferenciasAppTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PreferenciasAppTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+                Value<bool> seguridadBloqueoActivo = const Value.absent(),
+                Value<String?> seguridadPin = const Value.absent(),
+                Value<bool> seguridadUsarHuella = const Value.absent(),
+                Value<String> seguridadTiempoBloqueo = const Value.absent(),
+                Value<int> seguridadIntentosFallidos = const Value.absent(),
+                Value<int?> seguridadBloqueadoHastaMs = const Value.absent(),
+                Value<int?> ultimoRespaldoMs = const Value.absent(),
+              }) => PreferenciasAppTableCompanion(
+                id: id,
+                themeMode: themeMode,
+                seguridadBloqueoActivo: seguridadBloqueoActivo,
+                seguridadPin: seguridadPin,
+                seguridadUsarHuella: seguridadUsarHuella,
+                seguridadTiempoBloqueo: seguridadTiempoBloqueo,
+                seguridadIntentosFallidos: seguridadIntentosFallidos,
+                seguridadBloqueadoHastaMs: seguridadBloqueadoHastaMs,
+                ultimoRespaldoMs: ultimoRespaldoMs,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> themeMode = const Value.absent(),
+                Value<bool> seguridadBloqueoActivo = const Value.absent(),
+                Value<String?> seguridadPin = const Value.absent(),
+                Value<bool> seguridadUsarHuella = const Value.absent(),
+                Value<String> seguridadTiempoBloqueo = const Value.absent(),
+                Value<int> seguridadIntentosFallidos = const Value.absent(),
+                Value<int?> seguridadBloqueadoHastaMs = const Value.absent(),
+                Value<int?> ultimoRespaldoMs = const Value.absent(),
+              }) => PreferenciasAppTableCompanion.insert(
+                id: id,
+                themeMode: themeMode,
+                seguridadBloqueoActivo: seguridadBloqueoActivo,
+                seguridadPin: seguridadPin,
+                seguridadUsarHuella: seguridadUsarHuella,
+                seguridadTiempoBloqueo: seguridadTiempoBloqueo,
+                seguridadIntentosFallidos: seguridadIntentosFallidos,
+                seguridadBloqueadoHastaMs: seguridadBloqueadoHastaMs,
+                ultimoRespaldoMs: ultimoRespaldoMs,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PreferenciasAppTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PreferenciasAppTableTable,
+      PreferenciasAppRow,
+      $$PreferenciasAppTableTableFilterComposer,
+      $$PreferenciasAppTableTableOrderingComposer,
+      $$PreferenciasAppTableTableAnnotationComposer,
+      $$PreferenciasAppTableTableCreateCompanionBuilder,
+      $$PreferenciasAppTableTableUpdateCompanionBuilder,
+      (
+        PreferenciasAppRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PreferenciasAppTableTable,
+          PreferenciasAppRow
+        >,
+      ),
+      PreferenciasAppRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6649,4 +7602,6 @@ class $AppDatabaseManager {
       );
   $$CierresCajaTableTableTableManager get cierresCajaTable =>
       $$CierresCajaTableTableTableManager(_db, _db.cierresCajaTable);
+  $$PreferenciasAppTableTableTableManager get preferenciasAppTable =>
+      $$PreferenciasAppTableTableTableManager(_db, _db.preferenciasAppTable);
 }

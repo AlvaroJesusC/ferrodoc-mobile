@@ -1,5 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/core/time/clock_provider.dart';
+import 'package:ferrodoc_app/features/actualizacion/presentation/controllers/actualizacion_controller.dart';
+import 'package:ferrodoc_app/features/actualizacion/presentation/widgets/actualizacion_dialog.dart';
 import 'package:ferrodoc_app/features/catalogo/presentation/catalogo_screen.dart';
 import 'package:ferrodoc_app/features/documentos/presentation/lista_documentos_screen.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/inicio_screen.dart';
@@ -25,8 +29,62 @@ class MainShellScaffold extends ConsumerStatefulWidget {
   ConsumerState<MainShellScaffold> createState() => _MainShellScaffoldState();
 }
 
-class _MainShellScaffoldState extends ConsumerState<MainShellScaffold> {
+class _MainShellScaffoldState extends ConsumerState<MainShellScaffold>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
+  DateTime? _backgroundedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_verificarActualizacionSilenciosa());
+    });
+  }
+
+  Future<void> _verificarActualizacionSilenciosa() async {
+    final info = await ref
+        .read(actualizacionNotifierProvider.notifier)
+        .verificarSilencioso();
+    if (!mounted || info == null) return;
+    final seguridad = ref.read(seguridadProvider);
+    if (seguridad.bloqueoActivo && !seguridad.estaAutenticado) return;
+    await ActualizacionDialog.mostrar(context, info: info);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final now = ref.read(appClockProvider)();
+    final seguridad = ref.read(seguridadProvider);
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      if (seguridad.bloqueoActivo && seguridad.estaAutenticado) {
+        _backgroundedAt ??= now;
+      }
+      return;
+    }
+
+    if (state == AppLifecycleState.resumed) {
+      final pausedAt = _backgroundedAt;
+      _backgroundedAt = null;
+      if (pausedAt == null) return;
+      if (!seguridad.bloqueoActivo || !seguridad.estaAutenticado) return;
+
+      final elapsed = now.difference(pausedAt);
+      if (elapsed.inSeconds >= seguridad.tiempoBloqueo.segundos) {
+        ref.read(seguridadProvider.notifier).bloquear();
+      }
+    }
+  }
 
   void _onTabSelected(int index) {
     if (_currentIndex == index) return;

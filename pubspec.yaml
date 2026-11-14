@@ -47,6 +47,10 @@ dependencies:
   url_launcher: ^6.3.1
   share_plus: ^10.1.4
   archive: 3.6.1
+  package_info_plus: ^9.0.1
+  http: ^1.6.0
+  ota_update: ^7.1.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

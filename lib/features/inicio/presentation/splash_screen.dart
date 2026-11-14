@@ -2,13 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferrodoc_app/core/navigation/main_shell_scaffold.dart';
+import 'package:ferrodoc_app/data/database/database_provider.dart';
+import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/inicio/presentation/widgets/splash_logo.dart';
+import 'package:ferrodoc_app/features/respaldo/data/respaldo_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/bloqueo_screen.dart';
 import 'package:ferrodoc_app/theme/app_colors.dart';
 import 'package:ferrodoc_app/theme/app_motion.dart';
 import 'package:ferrodoc_app/theme/app_shapes.dart';
 import 'package:ferrodoc_app/theme/app_typography.dart';
+import 'package:ferrodoc_app/theme/theme_mode_provider.dart';
 
 /// Pantalla P01 — Pantalla de inicio (splash) de ferrodoc_app (F17).
 ///
@@ -40,6 +44,7 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen> {
   bool _isLoading = true;
   bool _hasError = false;
+  int _attemptId = 0;
   Timer? _splashTimer;
 
   @override
@@ -55,6 +60,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void _iniciarCarga() {
+    _splashTimer?.cancel();
+    final attemptId = ++_attemptId;
     setState(() {
       _isLoading = true;
       _hasError = false;
@@ -62,33 +69,62 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     // En postFrameCallback para leer tokens de movimiento y reducción de animación
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      if (widget.simularFalloCarga) {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-        });
-        return;
-      }
-
-      if (!widget.autoNavigate) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
-      final motion = AppMotion.of(context);
-      final duracionEfectiva = widget.customDuration ??
-          resolveMotion(context, motion.splash);
-
-      _splashTimer?.cancel();
-      _splashTimer = Timer(duracionEfectiva, () {
-        if (!mounted) return;
-        _completarYRedirigir();
-      });
+      if (!mounted || attemptId != _attemptId) return;
+      unawaited(_ejecutarCarga(attemptId));
     });
+  }
+
+  Future<void> _ejecutarCarga(int attemptId) async {
+    if (widget.simularFalloCarga) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+      return;
+    }
+
+    final motion = AppMotion.of(context);
+    final duracionEfectiva =
+        widget.customDuration ?? resolveMotion(context, motion.splash);
+
+    try {
+      await _hidratarEstadoLocal();
+    } catch (e) {
+      debugPrint('Error abriendo base de datos local en Splash: $e');
+      if (!mounted || attemptId != _attemptId) return;
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+      return;
+    }
+
+    if (!mounted || attemptId != _attemptId) return;
+
+    if (!widget.autoNavigate) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    _splashTimer?.cancel();
+    _splashTimer = Timer(duracionEfectiva, () {
+      if (!mounted || attemptId != _attemptId) return;
+      _completarYRedirigir();
+    });
+  }
+
+  Future<void> _hidratarEstadoLocal() async {
+    final db = ref.read(appDatabaseProvider);
+    await db.customSelect('SELECT 1').get();
+
+    await Future.wait([
+      ref.read(themeModeProvider.notifier).cargar(),
+      ref.read(configuracionProvider.notifier).cargar(),
+      ref.read(seguridadProvider.notifier).cargar(),
+      ref.read(respaldoProvider.notifier).cargar(),
+    ]);
   }
 
   void _completarYRedirigir() {
@@ -113,9 +149,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     } else {
       // Sin bloqueo activo → Va a P02 (Inicio a través del contenedor Shell)
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const MainShellScaffold(),
-        ),
+        MaterialPageRoute<void>(builder: (_) => const MainShellScaffold()),
       );
     }
   }
@@ -286,4 +320,3 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     );
   }
 }
-
