@@ -13,19 +13,33 @@ final class ActualizacionDisponible extends ResultadoVerificacion {
 }
 
 final class AppActualizada extends ResultadoVerificacion {
-  const AppActualizada(this.versionActual);
+  const AppActualizada(this.versionActual, {this.mensaje});
 
   final String versionActual;
+  final String? mensaje;
 }
 
 final class VerificacionOmitida extends ResultadoVerificacion {
   const VerificacionOmitida();
 }
 
+/// Clasifica el motivo por el que no se pudo completar una verificación.
+enum TipoErrorVerificacion {
+  /// No hay conexión a internet o expiró el tiempo de respuesta.
+  sinConexion,
+
+  /// El servidor respondió pero no hay un paquete válido disponible ahora.
+  noDisponible,
+}
+
 final class VerificacionFallida extends ResultadoVerificacion {
-  const VerificacionFallida(this.mensaje);
+  const VerificacionFallida(
+    this.mensaje, {
+    this.tipo = TipoErrorVerificacion.noDisponible,
+  });
 
   final String mensaje;
+  final TipoErrorVerificacion tipo;
 }
 
 /// Estado visual de la tarjeta de actualizaciones en ajustes.
@@ -42,7 +56,21 @@ final class EstadoComprobando extends EstadoVerificacionUi {
 }
 
 final class EstadoAppActualizada extends EstadoVerificacionUi {
-  const EstadoAppActualizada();
+  const EstadoAppActualizada({
+    this.mensaje =
+        'No hay actualizaciones disponibles. Ya tienes la última versión.',
+  });
+
+  final String mensaje;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is EstadoAppActualizada && other.mensaje == mensaje;
+  }
+
+  @override
+  int get hashCode => mensaje.hashCode;
 }
 
 final class EstadoActualizacionDisponible extends EstadoVerificacionUi {
@@ -61,18 +89,24 @@ final class EstadoActualizacionDisponible extends EstadoVerificacionUi {
 }
 
 final class EstadoErrorVerificacion extends EstadoVerificacionUi {
-  const EstadoErrorVerificacion(this.mensaje);
+  const EstadoErrorVerificacion(
+    this.mensaje, {
+    this.tipo = TipoErrorVerificacion.noDisponible,
+  });
 
   final String mensaje;
+  final TipoErrorVerificacion tipo;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is EstadoErrorVerificacion && other.mensaje == mensaje;
+    return other is EstadoErrorVerificacion &&
+        other.mensaje == mensaje &&
+        other.tipo == tipo;
   }
 
   @override
-  int get hashCode => mensaje.hashCode;
+  int get hashCode => Object.hash(mensaje, tipo);
 }
 
 /// Estado de la descarga e instalación OTA dentro del diálogo de actualización.

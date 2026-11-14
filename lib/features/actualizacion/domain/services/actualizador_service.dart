@@ -107,13 +107,15 @@ class GitHubActualizadorService implements ActualizadorService {
       }
 
       if (respuesta.statusCode == 404) {
-        return const VerificacionFallida(
-          'Aún no hay publicaciones disponibles en GitHub Releases.',
+        return AppActualizada(
+          versionActual,
+          mensaje: 'No hay actualizaciones disponibles por el momento.',
         );
       }
       if (respuesta.statusCode != 200) {
         return VerificacionFallida(
-          'No se pudo consultar actualizaciones (HTTP ${respuesta.statusCode}).',
+          'No se pudieron consultar actualizaciones en este momento (HTTP ${respuesta.statusCode}).',
+          tipo: TipoErrorVerificacion.noDisponible,
         );
       }
 
@@ -121,6 +123,7 @@ class GitHubActualizadorService implements ActualizadorService {
       if (decoded is! Map<String, dynamic>) {
         return const VerificacionFallida(
           'Respuesta inesperada al consultar versiones.',
+          tipo: TipoErrorVerificacion.noDisponible,
         );
       }
 
@@ -129,6 +132,7 @@ class GitHubActualizadorService implements ActualizadorService {
       if (versionRemota.isEmpty) {
         return const VerificacionFallida(
           'La publicación remota no especifica una versión válida.',
+          tipo: TipoErrorVerificacion.noDisponible,
         );
       }
 
@@ -148,7 +152,8 @@ class GitHubActualizadorService implements ActualizadorService {
 
       if (seleccionado == null) {
         return VerificacionFallida(
-          'Se encontró la versión v$versionRemota, pero no incluye un APK compatible.',
+          'Se encontró la versión v$versionRemota, pero aún no incluye un APK compatible.',
+          tipo: TipoErrorVerificacion.noDisponible,
         );
       }
 
@@ -165,24 +170,29 @@ class GitHubActualizadorService implements ActualizadorService {
       );
     } on TimeoutException {
       return const VerificacionFallida(
-        'Tiempo de espera agotado al consultar GitHub.',
+        'Tiempo de espera agotado al consultar actualizaciones.',
+        tipo: TipoErrorVerificacion.sinConexion,
       );
     } on SocketException {
       return const VerificacionFallida(
-        'Sin conexión a internet. Conéctate para buscar actualizaciones.',
+        'Sin conexión a internet. Verifica tu red para buscar actualizaciones.',
+        tipo: TipoErrorVerificacion.sinConexion,
       );
     } on http.ClientException {
       return const VerificacionFallida(
-        'No se pudo conectar con GitHub. Verifica tu conexión.',
+        'No se pudo conectar con GitHub. Verifica tu conexión a internet.',
+        tipo: TipoErrorVerificacion.sinConexion,
       );
     } on FormatException {
       return const VerificacionFallida(
         'No se pudo interpretar la información de la versión remota.',
+        tipo: TipoErrorVerificacion.noDisponible,
       );
     } catch (e, stack) {
       debugPrint('[GitHubActualizadorService] Error inesperado: $e\n$stack');
       return const VerificacionFallida(
-        'Ocurrió un error al buscar actualizaciones.',
+        'No se pudo comprobar actualizaciones en este momento.',
+        tipo: TipoErrorVerificacion.noDisponible,
       );
     }
   }

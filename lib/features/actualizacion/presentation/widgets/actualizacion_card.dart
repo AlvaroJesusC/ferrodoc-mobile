@@ -105,11 +105,18 @@ class _ActualizacionCardHeader extends StatelessWidget {
         colors.primaryContainer,
         colors.primary,
       ),
-      EstadoErrorVerificacion() => (
-        'SIN RED',
-        colors.errorContainer,
-        colors.onErrorContainer,
-      ),
+      EstadoErrorVerificacion(:final tipo) => switch (tipo) {
+        TipoErrorVerificacion.sinConexion => (
+          'SIN CONEXIÓN',
+          colors.errorContainer,
+          colors.onErrorContainer,
+        ),
+        TipoErrorVerificacion.noDisponible => (
+          'NO DISPONIBLE',
+          colors.inactiveBg,
+          colors.inactiveText,
+        ),
+      },
     };
 
     return Row(
@@ -236,12 +243,12 @@ class _ActualizacionCardBody extends StatelessWidget {
           ),
         ],
       ),
-      EstadoAppActualizada() => Column(
+      EstadoAppActualizada(:final mensaje) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _StatusBanner(
             icono: Icons.check_circle_outline_rounded,
-            texto: 'Ya tienes instalada la última versión disponible.',
+            texto: mensaje,
             bgColor: colors.successContainer,
             fgColor: colors.onSuccessContainer,
           ),
@@ -284,18 +291,26 @@ class _ActualizacionCardBody extends StatelessWidget {
           ),
         ],
       ),
-      EstadoErrorVerificacion(:final mensaje) => Column(
+      EstadoErrorVerificacion(:final mensaje, :final tipo) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _StatusBanner(
-            icono: Icons.wifi_off_rounded,
+            icono: tipo == TipoErrorVerificacion.sinConexion
+                ? Icons.cloud_off_rounded
+                : Icons.info_outline_rounded,
             texto: mensaje,
-            bgColor: colors.errorContainer,
-            fgColor: colors.onErrorContainer,
+            bgColor: tipo == TipoErrorVerificacion.sinConexion
+                ? colors.errorContainer
+                : colors.inactiveBg,
+            fgColor: tipo == TipoErrorVerificacion.sinConexion
+                ? colors.onErrorContainer
+                : colors.onSurface,
           ),
           SizedBox(height: shapes.spaceMedium),
           _BuscarButton(
-            label: 'Reintentar búsqueda',
+            label: tipo == TipoErrorVerificacion.sinConexion
+                ? 'Reintentar búsqueda'
+                : 'Buscar de nuevo',
             icono: Icons.refresh_rounded,
             onPressed: onBuscar,
           ),

@@ -102,7 +102,7 @@ void main() {
       expect(resultado, isA<AppActualizada>());
     });
 
-    test('verificarActualizacion retorna VerificacionFallida en 404', () async {
+    test('verificarActualizacion retorna AppActualizada sin error en 404 (sin releases)', () async {
       final client = MockClient((request) async {
         return http.Response('Not Found', 404);
       });
@@ -113,7 +113,29 @@ void main() {
       );
 
       final resultado = await service.verificarActualizacion(forzar: true);
+      expect(resultado, isA<AppActualizada>());
+      expect(
+        (resultado as AppActualizada).mensaje,
+        'No hay actualizaciones disponibles por el momento.',
+      );
+    });
+
+    test('verificarActualizacion retorna VerificacionFallida noDisponible en HTTP 500', () async {
+      final client = MockClient((request) async {
+        return http.Response('Server Error', 500);
+      });
+
+      final service = GitHubActualizadorService(
+        clock: () => DateTime(2026, 11, 13, 12, 0),
+        httpClient: client,
+      );
+
+      final resultado = await service.verificarActualizacion(forzar: true);
       expect(resultado, isA<VerificacionFallida>());
+      expect(
+        (resultado as VerificacionFallida).tipo,
+        TipoErrorVerificacion.noDisponible,
+      );
     });
   });
 
@@ -146,15 +168,18 @@ void main() {
       expect(fake.verificarCalls, 1);
       expect(find.text('AL DÍA'), findsOneWidget);
       expect(
-        find.text('Ya tienes instalada la última versión disponible.'),
+        find.text(
+          'No hay actualizaciones disponibles. Ya tienes la última versión.',
+        ),
         findsOneWidget,
       );
     });
 
-    testWidgets('muestra error amigable si falla la conexión', (tester) async {
+    testWidgets('muestra error amigable si falla la conexión y sin icono wifi_off', (tester) async {
       final fake = FakeActualizadorService(
         resultadoManual: const VerificacionFallida(
-          'Sin conexión a internet. Conéctate para buscar actualizaciones.',
+          'Sin conexión a internet. Verifica tu red para buscar actualizaciones.',
+          tipo: TipoErrorVerificacion.sinConexion,
         ),
       );
       final container = ProviderContainer(
@@ -174,8 +199,39 @@ void main() {
       await tester.tap(find.text('Buscar actualizaciones'));
       await tester.pumpAndSettle();
 
-      expect(find.text('SIN RED'), findsOneWidget);
+      expect(find.text('SIN CONEXIÓN'), findsOneWidget);
+      expect(find.byIcon(Icons.cloud_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_off_rounded), findsNothing);
       expect(find.text('Reintentar búsqueda'), findsOneWidget);
+    });
+
+    testWidgets('muestra NO DISPONIBLE con icono info cuando falla el servidor', (tester) async {
+      final fake = FakeActualizadorService(
+        resultadoManual: const VerificacionFallida(
+          'No se pudieron consultar actualizaciones en este momento (HTTP 500).',
+          tipo: TipoErrorVerificacion.noDisponible,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [actualizadorServiceProvider.overrideWithValue(fake)],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          container: container,
+          home: const Scaffold(body: ActualizacionCard()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Buscar actualizaciones'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('NO DISPONIBLE'), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_off_rounded), findsNothing);
+      expect(find.text('Buscar de nuevo'), findsOneWidget);
     });
 
     testWidgets('abre ActualizacionDialog cuando hay nueva versión y muestra progreso', (tester) async {

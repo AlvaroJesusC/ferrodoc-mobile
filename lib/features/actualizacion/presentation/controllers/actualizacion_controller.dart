@@ -49,10 +49,12 @@ class ActualizacionNotifier extends Notifier<ActualizacionUiState> {
           estado: EstadoActualizacionDisponible(info),
         );
         return info;
-      case AppActualizada(:final versionActual):
+      case AppActualizada(:final versionActual, :final mensaje):
         state = state.copyWith(
           versionActual: versionActual,
-          estado: const EstadoAppActualizada(),
+          estado: mensaje != null
+              ? EstadoAppActualizada(mensaje: mensaje)
+              : const EstadoAppActualizada(),
         );
         return null;
       case VerificacionOmitida():
@@ -82,10 +84,12 @@ class ActualizacionNotifier extends Notifier<ActualizacionUiState> {
           estado: EstadoActualizacionDisponible(info),
         );
         return info;
-      case AppActualizada(:final versionActual):
+      case AppActualizada(:final versionActual, :final mensaje):
         state = state.copyWith(
           versionActual: versionActual,
-          estado: const EstadoAppActualizada(),
+          estado: mensaje != null
+              ? EstadoAppActualizada(mensaje: mensaje)
+              : const EstadoAppActualizada(),
         );
         return null;
       case VerificacionOmitida():
@@ -94,10 +98,10 @@ class ActualizacionNotifier extends Notifier<ActualizacionUiState> {
           estado: const EstadoAppActualizada(),
         );
         return null;
-      case VerificacionFallida(:final mensaje):
+      case VerificacionFallida(:final mensaje, :final tipo):
         state = state.copyWith(
           versionActual: version,
-          estado: EstadoErrorVerificacion(mensaje),
+          estado: EstadoErrorVerificacion(mensaje, tipo: tipo),
         );
         return null;
     }
