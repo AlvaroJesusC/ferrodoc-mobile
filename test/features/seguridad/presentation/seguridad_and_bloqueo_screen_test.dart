@@ -415,5 +415,39 @@ void main() {
         expect(desbloqueado, isTrue);
       },
     );
+
+    testWidgets(
+      'botón Confirmar valida manualmente PIN incompleto (<4) y PIN de distinta longitud (6 dígitos)',
+      (tester) async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        container.read(seguridadProvider.notifier).crearPin('123456');
+        container.read(seguridadProvider.notifier).bloquear();
+
+        await tester.pumpWidget(_createBloqueoApp(container: container));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Confirmar'), findsOneWidget);
+
+        // Ingresar solo 2 dígitos y tocar Confirmar
+        await tester.tap(find.text('1'));
+        await tester.pump();
+        await tester.tap(find.text('2'));
+        await tester.pump();
+        await tester.tap(find.text('Confirmar'));
+        await tester.pumpAndSettle();
+        expect(find.text('Ingresa al menos 4 dígitos'), findsOneWidget);
+
+        // Completar a 4 dígitos y tocar Confirmar contra PIN de 6 dígitos
+        await tester.tap(find.text('3'));
+        await tester.pump();
+        await tester.tap(find.text('4'));
+        await tester.pump();
+        await tester.tap(find.text('Confirmar'));
+        await tester.pumpAndSettle();
+        expect(find.text('PIN incorrecto'), findsOneWidget);
+      },
+    );
   });
 }

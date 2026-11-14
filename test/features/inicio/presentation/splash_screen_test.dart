@@ -117,6 +117,20 @@ void main() {
       // Debe haber navegado a P24 Bloqueo
       expect(find.byType(BloqueoScreen), findsOneWidget);
       expect(find.text('Ingresa tu PIN de seguridad'), findsOneWidget);
+
+      // Ingresar el PIN correcto tras pushReplacement de SplashScreen y validar desbloqueo a P02
+      await tester.tap(find.text('1'));
+      await tester.pump();
+      await tester.tap(find.text('2'));
+      await tester.pump();
+      await tester.tap(find.text('3'));
+      await tester.pump();
+      await tester.tap(find.text('4'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BloqueoScreen), findsNothing);
+      expect(find.byType(MainShellScaffold), findsOneWidget);
+      expect(container.read(seguridadProvider).estaAutenticado, isTrue);
     });
   });
 }

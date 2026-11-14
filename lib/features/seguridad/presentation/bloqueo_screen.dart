@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ferrodoc_app/features/configuracion/data/configuracion_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/data/seguridad_provider.dart';
 import 'package:ferrodoc_app/features/seguridad/domain/services/biometrics_service.dart';
 import 'package:ferrodoc_app/features/seguridad/presentation/widgets/pin_dots_indicator.dart';
@@ -117,6 +118,19 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
     }
   }
 
+  void _confirmarPinManual() {
+    if (_segundosRestantes > 0) return;
+    if (_pinIngresado.length < 4) {
+      HapticFeedback.heavyImpact();
+      setState(() {
+        _hasError = true;
+        _mensajeError = 'Ingresa al menos 4 dígitos';
+      });
+      return;
+    }
+    _validarPin();
+  }
+
   void _validarPin() {
     final notifier = ref.read(seguridadProvider.notifier);
     final exito = notifier.verificarPin(_pinIngresado);
@@ -201,103 +215,153 @@ class _BloqueoScreenState extends ConsumerState<BloqueoScreen> {
     final shapes = AppShapes.of(context);
     final typography = AppTypography.of(context);
     final seguridad = ref.watch(seguridadProvider);
+    final nombreNegocio = ref.watch(
+      configuracionProvider.select((c) => c.nombre),
+    );
 
     return PopScope(
       canPop: false,
       child: Scaffold(
         backgroundColor: colors.surface,
         body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(flex: 2),
-
-            // Encabezado con ícono de candado / negocio
-            Container(
-              width: shapes.spaceXXLarge + shapes.spaceLarge,
-              height: shapes.spaceXXLarge + shapes.spaceLarge,
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.lock_rounded,
-                size: shapes.spaceXLarge,
-                color: colors.primary,
-              ),
-            ),
-
-            SizedBox(height: shapes.spaceLarge),
-
-            Text(
-              'Ferretería AYM',
-              style: typography.titleSection.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colors.onSurface,
-              ),
-            ),
-            SizedBox(height: shapes.spaceSmall),
-            Text(
-              'Ingresa tu PIN de seguridad',
-              style: typography.bodyMedium.copyWith(
-                color: colors.onSurfaceMuted,
-              ),
-            ),
-
-            SizedBox(height: shapes.spaceXLarge),
-
-            // Puntos de PIN
-            PinDotsIndicator(
-              length: _pinIngresado.length,
-              totalDots: seguridad.pin?.length ?? 4,
-              hasError: _hasError,
-            ),
-
-            SizedBox(height: shapes.spaceMedium),
-
-            // Mensaje de error / penalización
-            SizedBox(
-              height: shapes.spaceLarge,
-              child: _mensajeError != null
-                  ? Text(
-                      _mensajeError!,
-                      textAlign: TextAlign.center,
-                      style: typography.labelSubtle.copyWith(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-
-            const Spacer(flex: 1),
-
-            // Teclado numérico táctil
-            PinKeypad(
-              onKeyPressed: _onDigitPressed,
-              onDelete: _onDelete,
-              onBiometric: _onBiometric,
-              showBiometric: seguridad.usarHuella,
-              enabled: _segundosRestantes == 0,
-            ),
-
-            const Spacer(flex: 1),
-
-            // Enlace ¿Olvidaste tu PIN?
-            TextButton(
-              onPressed: _mostrarOlvidoPin,
-              child: Text(
-                '¿Olvidaste tu PIN?',
-                style: typography.buttonLabel.copyWith(
-                  color: colors.primary,
-                  decoration: TextDecoration.underline,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: shapes.spaceBase,
+                  vertical: shapes.spaceSmall,
                 ),
-              ),
-            ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - shapes.spaceMedium,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        const Spacer(flex: 2),
 
-            SizedBox(height: shapes.spaceBase),
-          ],
+                        // Encabezado con ícono de candado / negocio
+                        Container(
+                          width: shapes.spaceXXLarge + shapes.spaceLarge,
+                          height: shapes.spaceXXLarge + shapes.spaceLarge,
+                          decoration: BoxDecoration(
+                            color: colors.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.lock_rounded,
+                            size: shapes.spaceXLarge,
+                            color: colors.primary,
+                          ),
+                        ),
+
+                        SizedBox(height: shapes.spaceLarge),
+
+                        Text(
+                          nombreNegocio,
+                          style: typography.titleSection.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colors.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: shapes.spaceSmall),
+                        Text(
+                          'Ingresa tu PIN de seguridad',
+                          style: typography.bodyMedium.copyWith(
+                            color: colors.onSurfaceMuted,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        SizedBox(height: shapes.spaceLarge),
+
+                        // Puntos de PIN
+                        PinDotsIndicator(
+                          length: _pinIngresado.length,
+                          totalDots: seguridad.pin?.length ?? 4,
+                          hasError: _hasError,
+                        ),
+
+                        SizedBox(height: shapes.spaceMedium),
+
+                        // Mensaje de error / penalización sin recorte vertical
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: shapes.spaceLarge,
+                          ),
+                          child: Center(
+                            child: _mensajeError != null
+                                ? Text(
+                                    _mensajeError!,
+                                    textAlign: TextAlign.center,
+                                    style: typography.labelSubtle.copyWith(
+                                      color: colors.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
+
+                        const Spacer(flex: 1),
+
+                        // Teclado numérico táctil
+                        PinKeypad(
+                          onKeyPressed: _onDigitPressed,
+                          onDelete: _onDelete,
+                          onBiometric: _onBiometric,
+                          showBiometric: seguridad.usarHuella,
+                          enabled: _segundosRestantes == 0,
+                        ),
+
+                        SizedBox(height: shapes.spaceMedium),
+
+                        // Botón explícito de confirmación del PIN
+                        Padding(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            horizontal: shapes.spaceXLarge,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: _pinIngresado.isNotEmpty &&
+                                      _segundosRestantes == 0
+                                  ? _confirmarPinManual
+                                  : null,
+                              icon: const Icon(Icons.check_rounded),
+                              label: const Text('Confirmar'),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(0, 48),
+                                shape: shapes.mediumShape(),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(flex: 1),
+
+                        // Enlace ¿Olvidaste tu PIN?
+                        TextButton(
+                          onPressed: _mostrarOlvidoPin,
+                          child: Text(
+                            '¿Olvidaste tu PIN?',
+                            style: typography.buttonLabel.copyWith(
+                              color: colors.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: shapes.spaceSmall),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }

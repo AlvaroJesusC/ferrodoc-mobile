@@ -149,6 +149,17 @@ class _SeguridadScreenState extends ConsumerState<SeguridadScreen> {
             obscureText: true,
             maxLength: 6,
             autofocus: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              final pin = ctrl.text.trim();
+              if (pin.length < 4 || pin.length > 6) {
+                setDialogState(() {
+                  errorText = 'Ingresa entre 4 y 6 dígitos';
+                });
+                return;
+              }
+              Navigator.of(ctx).pop(pin);
+            },
             onChanged: (_) {
               if (errorText != null) {
                 setDialogState(() {

@@ -44,14 +44,16 @@ class SeguridadNotifier extends Notifier<SeguridadState> {
       final prefs = await repo.getPreferencias();
       if (!ref.mounted || _revision != revInicial || _cargado) return;
       _cargado = true;
+      final pinValido = prefs.pin != null && prefs.pin!.length >= 4;
+      final bloqueoEfectivo = prefs.bloqueoActivo && pinValido;
       state = SeguridadState(
-        bloqueoActivo: prefs.bloqueoActivo,
-        pin: prefs.pin,
-        usarHuella: prefs.usarHuella,
+        bloqueoActivo: bloqueoEfectivo,
+        pin: bloqueoEfectivo ? prefs.pin : null,
+        usarHuella: bloqueoEfectivo && prefs.usarHuella,
         tiempoBloqueo: prefs.tiempoBloqueo,
-        estaAutenticado: !prefs.bloqueoActivo,
-        intentosFallidos: prefs.intentosFallidos,
-        bloqueadoHasta: prefs.bloqueadoHasta,
+        estaAutenticado: !bloqueoEfectivo,
+        intentosFallidos: bloqueoEfectivo ? prefs.intentosFallidos : 0,
+        bloqueadoHasta: bloqueoEfectivo ? prefs.bloqueadoHasta : null,
       );
     } catch (_) {
       _loadFuture = null;

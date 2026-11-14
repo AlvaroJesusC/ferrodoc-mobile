@@ -134,10 +134,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       // Si la seguridad está activada y bloqueada → Va a P24 (Bloqueo)
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
-          builder: (context) => BloqueoScreen(
+          builder: (bloqueoContext) => BloqueoScreen(
             onDesbloqueado: () {
-              ref.read(seguridadProvider.notifier).desbloquear();
-              Navigator.of(context).pushReplacement(
+              // No usar `ref` de SplashScreen aquí porque este estado ya fue desmontado
+              // tras pushReplacement; verificarPin/autenticarConHuella ya desbloquean.
+              Navigator.of(bloqueoContext).pushReplacement(
                 MaterialPageRoute<void>(
                   builder: (_) => const MainShellScaffold(),
                 ),
